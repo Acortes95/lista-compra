@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<title>Lista de la Compra</title>
+<meta name="description" content="Lista de la compra compartida para dos personas, en tiempo real.">
+
+<!-- PWA -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#fcfcfa">
+
+<!-- iOS PWA -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Compra">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="icon" href="icons/icon-192.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@600;700;800&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<div id="root-frame">
+  <div id="app">
+
+    <!-- ============ AUTH ============ -->
+    <section id="screen-auth" class="auth-screen screen hidden">
+      <div class="auth-brand">
+        <div class="mark">🧺</div>
+        <h1>Lista de la Compra</h1>
+        <p>Compartida, en tiempo real, para dos.</p>
+      </div>
+
+      <div class="auth-tabs">
+        <button class="auth-tab active" data-tab="login">Entrar</button>
+        <button class="auth-tab" data-tab="signup">Crear cuenta</button>
+      </div>
+
+      <div id="auth-error" class="error-msg hidden"></div>
+
+      <form id="form-login">
+        <div class="field">
+          <label for="login-email">Email</label>
+          <input id="login-email" type="email" autocomplete="email" required>
+        </div>
+        <div class="field">
+          <label for="login-password">Contraseña</label>
+          <input id="login-password" type="password" autocomplete="current-password" required>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width:100%">Entrar</button>
+      </form>
+
+      <form id="form-signup" class="hidden">
+        <div class="field">
+          <label for="signup-name">Tu nombre</label>
+          <input id="signup-name" type="text" autocomplete="name" required>
+        </div>
+        <div class="field">
+          <label for="signup-email">Email</label>
+          <input id="signup-email" type="email" autocomplete="email" required>
+        </div>
+        <div class="field">
+          <label for="signup-password">Contraseña</label>
+          <input id="signup-password" type="password" autocomplete="new-password" minlength="6" required>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width:100%">Crear cuenta</button>
+      </form>
+    </section>
+
+    <!-- ============ GROUP SETUP ============ -->
+    <section id="screen-group-setup" class="screen hidden">
+      <div class="topbar"><div class="topbar-inner"><h1>Tu grupo</h1></div></div>
+
+      <div style="padding-top:16px">
+        <div class="setup-card">
+          <h3>🆕 Crear un grupo nuevo</h3>
+          <p>Empieza tu lista y comparte el código con tu pareja.</p>
+          <div class="field">
+            <input id="new-group-name" type="text" placeholder="Nombre del grupo (opcional)">
+          </div>
+          <button id="btn-create-group" class="btn btn-primary" style="width:100%">Crear grupo</button>
+        </div>
+
+        <div class="setup-card">
+          <h3>🔗 Unirme a un grupo</h3>
+          <p>Introduce el código de invitación que te han pasado.</p>
+          <div class="field">
+            <input id="join-group-code" type="text" placeholder="Código de invitación" autocapitalize="off">
+          </div>
+          <button id="btn-join-group" class="btn btn-secondary" style="width:100%">Unirme</button>
+        </div>
+
+        <div id="group-setup-error" class="error-msg hidden"></div>
+      </div>
+    </section>
+
+    <!-- ============ SHOPPING LIST ============ -->
+    <section id="screen-shopping" class="screen hidden">
+      <div class="topbar">
+        <div class="topbar-inner">
+          <h1>🛒 Compra</h1>
+          <span class="sub" id="pending-count">0 pendientes</span>
+        </div>
+      </div>
+      <div id="shopping-content" style="padding-top:14px"></div>
+      <button class="fab" id="fab-add-item" aria-label="Añadir producto">+</button>
+    </section>
+
+    <!-- ============ FOODS CATALOG ============ -->
+    <section id="screen-foods" class="screen hidden">
+      <div class="topbar">
+        <div class="topbar-inner">
+          <h1>🥦 Alimentos</h1>
+          <span class="sub" id="foods-count">0 en catálogo</span>
+        </div>
+      </div>
+      <div id="foods-content" style="padding-top:14px"></div>
+      <button class="fab" id="fab-add-food" aria-label="Nuevo alimento">+</button>
+    </section>
+
+    <!-- ============ SETTINGS ============ -->
+    <section id="screen-settings" class="screen hidden">
+      <div class="topbar"><div class="topbar-inner"><h1>⚙️ Ajustes</h1></div></div>
+      <div style="padding-top:14px">
+        <div class="setup-card">
+          <h3>Tu cuenta</h3>
+          <div class="settings-row">
+            <span class="label">Nombre</span>
+            <span id="settings-name">—</span>
+          </div>
+          <div class="settings-row">
+            <span class="label">Email</span>
+            <span id="settings-email">—</span>
+          </div>
+        </div>
+
+        <div class="setup-card">
+          <h3>Tu grupo</h3>
+          <div class="settings-row">
+            <span class="label">Código de invitación</span>
+            <span id="settings-invite-code">—</span>
+          </div>
+          <p style="margin-top:10px">Comparte este código con tu pareja para que se una al mismo grupo.</p>
+        </div>
+
+        <button id="btn-logout" class="btn btn-danger" style="width:100%; margin-top:6px;">Cerrar sesión</button>
+      </div>
+    </section>
+
+    <!-- ============ LOADING ============ -->
+    <section id="screen-loading" class="screen">
+      <div class="spinner"></div>
+    </section>
+
+    <!-- ============ BOTTOM NAV ============ -->
+    <nav class="bottom-nav hidden" id="bottom-nav">
+      <button class="nav-btn active" data-screen="shopping">
+        <span class="icon">🛒</span><span>Compra</span>
+      </button>
+      <button class="nav-btn" data-screen="foods">
+        <span class="icon">🥦</span><span>Alimentos</span>
+      </button>
+      <button class="nav-btn" data-screen="settings">
+        <span class="icon">⚙️</span><span>Ajustes</span>
+      </button>
+    </nav>
+
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<!-- ============ SHEET: Add/Edit Food ============ -->
+<div id="sheet-food" class="sheet-backdrop hidden">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <h2 id="food-sheet-title">Nuevo alimento</h2>
+    <form id="form-food">
+      <input type="hidden" id="food-id">
+      <div class="field">
+        <label for="food-name">Nombre</label>
+        <input id="food-name" type="text" required placeholder="Ej. Leche">
+      </div>
+      <div class="field">
+        <label for="food-category">Categoría</label>
+        <select id="food-category" required></select>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label for="food-quantity">Cantidad habitual</label>
+          <input id="food-quantity" type="number" min="0" step="0.5" value="1" required>
+        </div>
+        <div class="field">
+          <label for="food-unit">Unidad</label>
+          <input id="food-unit" type="text" placeholder="unidades, kg, l..." value="unidades" required>
+        </div>
+      </div>
+      <div class="field">
+        <label for="food-notes">Notas (opcional)</label>
+        <textarea id="food-notes" placeholder="Marca preferida, tamaño..."></textarea>
+      </div>
+      <div class="sheet-actions">
+        <button type="button" class="btn btn-secondary" id="btn-cancel-food">Cancelar</button>
+        <button type="submit" class="btn btn-primary" id="btn-save-food">Guardar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ============ SHEET: Quick add to shopping list ============ -->
+<div id="sheet-quick-add" class="sheet-backdrop hidden">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <h2>Añadir a la compra</h2>
+    <div id="quick-add-list"></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/config.js"></script>
+<script src="js/supabaseClient.js"></script>
+<script src="js/state.js"></script>
+<script src="js/toast.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/groupSetup.js"></script>
+<script src="js/foods.js"></script>
+<script src="js/shopping.js"></script>
+<script src="js/realtime.js"></script>
+<script src="js/settings.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
