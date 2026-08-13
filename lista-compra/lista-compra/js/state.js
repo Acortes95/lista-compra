@@ -1,0 +1,45 @@
+// ============================================================
+// Estado global en memoria (nada de localStorage salvo la sesión
+// que ya gestiona el propio SDK de Supabase internamente)
+// ============================================================
+const AppState = {
+  session: null,
+  profile: null,
+  group: null,          // { id, name, invite_code }
+  categories: [],        // [{id, name, icon, sort_order}]
+  foods: [],              // catálogo completo (sin deleted_at)
+  shoppingList: [],       // filas de shopping_list + join de food
+  channel: null,          // canal realtime activo
+
+  categoryById(id) {
+    return this.categories.find(c => c.id === id);
+  },
+  foodById(id) {
+    return this.foods.find(f => f.id === id);
+  }
+};
+
+// Paleta de color por posición de categoría (se repite si hay más
+// categorías que colores — mantiene coherencia visual sin necesitar
+// una columna extra en la base de datos)
+const CATEGORY_PALETTE = [
+  { color: '#3f7d4e', bg: '#e9f2ea' }, // verde
+  { color: '#b6472f', bg: '#f7e9e5' }, // coral
+  { color: '#b6472f', bg: '#f7e9e5' }, // coral (pescadería)
+  { color: '#b9822a', bg: '#f6eede' }, // butter
+  { color: '#b9822a', bg: '#f6eede' }, // butter (panadería)
+  { color: '#3a5f8a', bg: '#e7edf3' }, // sky
+  { color: '#3a5f8a', bg: '#e7edf3' },
+  { color: '#3a5f8a', bg: '#e7edf3' },
+  { color: '#6b4a7a', bg: '#eee6f0' }, // plum
+  { color: '#6b4a7a', bg: '#eee6f0' },
+  { color: '#6b4a7a', bg: '#eee6f0' },
+  { color: '#5c6058', bg: '#f3f2ec' },
+  { color: '#5c6058', bg: '#f3f2ec' }
+];
+
+function categoryColor(categoryId) {
+  const idx = AppState.categories.findIndex(c => c.id === categoryId);
+  if (idx === -1) return CATEGORY_PALETTE[CATEGORY_PALETTE.length - 1];
+  return CATEGORY_PALETTE[idx % CATEGORY_PALETTE.length];
+}
