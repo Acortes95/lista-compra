@@ -11,6 +11,12 @@ const AppState = {
   shoppingList: [],       // filas de shopping_list + join de food
   channel: null,          // canal realtime activo
 
+  // Categorías plegadas por pantalla (solo visual, no se guarda en la BD)
+  uiState: {
+    collapsedFoodCategories: new Set(),
+    collapsedShoppingCategories: new Set()
+  },
+
   categoryById(id) {
     return this.categories.find(c => c.id === id);
   },
