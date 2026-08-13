@@ -198,6 +198,9 @@ a { color: inherit; }
   text-transform: uppercase;
   letter-spacing: 0.04em;
   border-bottom: 2px solid var(--cat-color, var(--ink));
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .category-header .icon { font-size: 18px; }
@@ -208,6 +211,19 @@ a { color: inherit; }
   color: var(--ink-soft);
   font-weight: 400;
   text-transform: none;
+}
+.category-header .chevron {
+  font-size: 11px;
+  color: var(--ink-soft);
+  transition: transform 0.15s ease;
+  line-height: 1;
+}
+
+.category-group.collapsed .category-header .chevron {
+  transform: rotate(-90deg);
+}
+.category-group.collapsed .category-items {
+  display: none;
 }
 
 /* ---------------- Item rows (receipt line) ---------------- */
@@ -692,14 +708,19 @@ a { color: inherit; }
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
+#root-frame {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
 /* Larger screens: constrain width, feel like a card app */
 @media (min-width: 640px) {
   body { align-items: center; background: var(--line); }
   #root-frame {
-    width: 100%;
     max-width: 480px;
-    min-height: 100vh;
-    min-height: 100dvh;
     background: var(--paper-dim);
     box-shadow: 0 0 40px rgba(0,0,0,0.15);
   }
