@@ -3,7 +3,7 @@
 // al instante y funcione mínimamente sin conexión.
 // Los datos siempre vienen de Supabase (network), nunca de caché.
 // ============================================================
-const CACHE_NAME = 'lista-compra-v1';
+const CACHE_NAME = 'lista-compra-v2';
 const SHELL_FILES = [
   './',
   './index.html',
