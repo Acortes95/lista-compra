@@ -184,13 +184,16 @@ function renderShoppingScreen() {
       const items = byCategory[cat.id];
       if (!items || !items.length) return;
       const pal = categoryColor(cat.id);
-      html += `<div class="category-group">
-        <div class="category-header" style="--cat-color:${pal.color}">
+      const collapsed = AppState.uiState.collapsedShoppingCategories.has(cat.id);
+      html += `<div class="category-group ${collapsed ? 'collapsed' : ''}">
+        <div class="category-header" style="--cat-color:${pal.color}" data-cat-toggle="${cat.id}">
           <span class="icon">${cat.icon}</span><span>${escapeHtml(cat.name)}</span>
           <span class="count">${items.length}</span>
-        </div>`;
+          <span class="chevron">▾</span>
+        </div>
+        <div class="category-items">`;
       items.forEach(item => { html += renderItemRow(item, pal); });
-      html += `</div>`;
+      html += `</div></div>`;
     });
   }
 
@@ -254,4 +257,13 @@ function attachShoppingListeners(container) {
   });
   const clearBtn = document.getElementById('btn-clear-purchased');
   if (clearBtn) clearBtn.addEventListener('click', clearPurchased);
+  container.querySelectorAll('[data-cat-toggle]').forEach(el => {
+    el.addEventListener('click', () => toggleShoppingCategory(el.dataset.catToggle));
+  });
+}
+
+function toggleShoppingCategory(catId) {
+  const set = AppState.uiState.collapsedShoppingCategories;
+  if (set.has(catId)) set.delete(catId); else set.add(catId);
+  renderShoppingScreen();
 }
