@@ -137,6 +137,9 @@ a { color: inherit; }
   padding-bottom: var(--safe-bottom);
   position: sticky;
   bottom: 0;
+  left: 0;
+  right: 0;
+  flex-shrink: 0;
   z-index: 10;
 }
 
@@ -151,12 +154,33 @@ a { color: inherit; }
   color: var(--ink-soft);
   font-weight: 600;
   letter-spacing: 0.02em;
+  position: relative;
+  transition: color 0.15s ease;
 }
 
-.nav-btn .icon { font-size: 21px; line-height: 1; }
+.nav-btn .icon {
+  font-size: 21px;
+  line-height: 1;
+  transition: transform 0.15s ease;
+}
 
-.nav-btn.active { color: var(--ink); }
-.nav-btn.active .icon { transform: translateY(-1px); }
+.nav-btn.active {
+  color: var(--ink);
+  font-weight: 800;
+}
+.nav-btn.active .icon { transform: translateY(-1px) scale(1.1); }
+
+.nav-btn.active::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 26px;
+  height: 3px;
+  border-radius: 0 0 4px 4px;
+  background: var(--ink);
+}
 
 /* ---------------- Category groups ---------------- */
 
