@@ -126,11 +126,14 @@ function renderFoodsScreen() {
     const items = byCategory[cat.id];
     if (!items || !items.length) return;
     const pal = categoryColor(cat.id);
-    html += `<div class="category-group">
-      <div class="category-header" style="--cat-color:${pal.color}">
+    const collapsed = AppState.uiState.collapsedFoodCategories.has(cat.id);
+    html += `<div class="category-group ${collapsed ? 'collapsed' : ''}">
+      <div class="category-header" style="--cat-color:${pal.color}" data-cat-toggle="${cat.id}">
         <span class="icon">${cat.icon}</span><span>${escapeHtml(cat.name)}</span>
         <span class="count">${items.length}</span>
-      </div>`;
+        <span class="chevron">▾</span>
+      </div>
+      <div class="category-items">`;
     items.forEach(f => {
       const inList = AppState.shoppingList.some(s => s.food_id === f.id && !s.purchased);
       html += `
@@ -146,7 +149,7 @@ function renderFoodsScreen() {
           </div>
         </div>`;
     });
-    html += `</div>`;
+    html += `</div></div>`;
   });
 
   container.innerHTML = html || `<div class="empty-state"><span class="emoji">🥕</span><p>Nada por aquí todavía.</p></div>`;
@@ -162,6 +165,15 @@ function renderFoodsScreen() {
       if (confirm('¿Eliminar este alimento del catálogo?')) deleteFood(btn.dataset.deleteFood);
     });
   });
+  container.querySelectorAll('[data-cat-toggle]').forEach(el => {
+    el.addEventListener('click', () => toggleFoodCategory(el.dataset.catToggle));
+  });
+}
+
+function toggleFoodCategory(catId) {
+  const set = AppState.uiState.collapsedFoodCategories;
+  if (set.has(catId)) set.delete(catId); else set.add(catId);
+  renderFoodsScreen();
 }
 
 function formatQty(q) {
