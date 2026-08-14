@@ -221,7 +221,9 @@ function renderItemRow(item, pal) {
   const name = item.foods?.name || '(eliminado)';
   const unit = item.foods?.unit || '';
   const assignedName = AppState.memberName(item.assigned_to);
-  const assignedLabel = assignedName ? `👤 ${escapeHtml(assignedName)}` : 'Sin asignar';
+  const assignedLabel = assignedName
+    ? `<img class="assign-avatar" src="${avatarUrl(AppState.memberAvatar(item.assigned_to))}" alt="">${escapeHtml(assignedName)}`
+    : 'Sin asignar';
   return `
     <div class="item-row ${item.purchased ? 'purchased' : ''}" style="--cat-color:${pal.color}">
       <button class="item-check ${item.purchased ? 'checked' : ''}" data-toggle="${item.id}">✓</button>
@@ -294,12 +296,16 @@ function openAssignSheet(itemId) {
   if (!item) return;
   const list = document.getElementById('assign-list');
 
-  const rows = [{ user_id: null, name: 'Sin asignar' }, ...AppState.members];
+  const rows = [{ user_id: null, name: 'Sin asignar', avatar_id: null }, ...AppState.members];
 
   list.innerHTML = rows.map(m => {
     const selected = (item.assigned_to || null) === (m.user_id || null);
+    const avatarImg = m.avatar_id
+      ? `<img class="member-avatar" src="${avatarUrl(m.avatar_id)}" alt="">`
+      : `<span class="member-avatar" style="display:inline-flex;align-items:center;justify-content:center;background:var(--paper-dim);">—</span>`;
     return `
-      <div class="settings-row" data-pick-assignee="${m.user_id ?? ''}" style="cursor:pointer;">
+      <div class="settings-row member-row-flex" data-pick-assignee="${m.user_id ?? ''}" style="cursor:pointer;">
+        ${avatarImg}
         <span style="${selected ? 'font-weight:700;' : ''}">${selected ? '✓ ' : ''}${escapeHtml(m.name)}</span>
       </div>`;
   }).join('');

@@ -41,6 +41,18 @@ function subscribeRealtime() {
         renderSettingsScreen();
       }
     )
+    .on('postgres_changes',
+      { event: 'UPDATE', schema: 'public', table: 'profiles' },
+      async (payload) => {
+        if (payload.new && payload.new.id === AppState.session.user.id) {
+          AppState.profile = payload.new;
+          updateNavAvatar();
+        }
+        await loadMembers();
+        renderSettingsScreen();
+        renderShoppingScreen();
+      }
+    )
     .subscribe((status, err) => {
       if (status === 'SUBSCRIBED') {
         console.log('[realtime] conectado al grupo', AppState.group.id);

@@ -30,10 +30,16 @@ function initBottomNav() {
 async function loadProfile() {
   const { data, error } = await supabaseClient
     .from('profiles')
-    .select('id, name')
+    .select('id, name, avatar_id')
     .eq('id', AppState.session.user.id)
     .single();
   if (!error) AppState.profile = data;
+  updateNavAvatar();
+}
+
+function updateNavAvatar() {
+  const img = document.getElementById('nav-avatar-icon');
+  if (img) img.src = avatarUrl(AppState.profile?.avatar_id);
 }
 
 // Se ejecuta una vez que sabemos que el usuario ya tiene grupo asignado.
@@ -82,6 +88,7 @@ function resetAppState() {
   AppState.categories = [];
   AppState.foods = [];
   AppState.shoppingList = [];
+  updateNavAvatar();
 }
 
 document.addEventListener('DOMContentLoaded', () => {

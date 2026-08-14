@@ -32,6 +32,10 @@ function initSettingsScreen() {
   document.getElementById('sheet-members').addEventListener('click', (e) => {
     if (e.target.id === 'sheet-members') closeMembersSheet();
   });
+  document.getElementById('btn-change-avatar').addEventListener('click', openAvatarPicker);
+  document.getElementById('sheet-avatar-picker').addEventListener('click', (e) => {
+    if (e.target.id === 'sheet-avatar-picker') closeAvatarPicker();
+  });
 
   document.getElementById('form-create-group-sheet').addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -75,6 +79,7 @@ function initSettingsScreen() {
 function renderSettingsScreen() {
   document.getElementById('settings-name').textContent = AppState.profile?.name || '—';
   document.getElementById('settings-email').textContent = AppState.session?.user?.email || '—';
+  document.getElementById('profile-avatar-img').src = avatarUrl(AppState.profile?.avatar_id);
   renderMyGroupsList();
   renderActiveGroupCard();
 }
@@ -150,9 +155,12 @@ function openMembersSheet() {
   } else {
     list.innerHTML = AppState.members.map(m => `
       <div class="settings-row">
-        <span>
-          ${escapeHtml(m.name)}${m.is_owner ? ' 👑' : ''}<br>
-          <span style="font-size:11.5px;color:var(--ink-soft);font-weight:400;">${escapeHtml(m.email || '')}</span>
+        <span class="member-row-flex">
+          <img class="member-avatar" src="${avatarUrl(m.avatar_id)}" alt="">
+          <span>
+            ${escapeHtml(m.name)}${m.is_owner ? ' 👑' : ''}<br>
+            <span style="font-size:11.5px;color:var(--ink-soft);font-weight:400;">${escapeHtml(m.email || '')}</span>
+          </span>
         </span>
         ${m.is_owner ? '<span class="label">Propietario</span>' : ''}
       </div>`).join('');
@@ -161,6 +169,54 @@ function openMembersSheet() {
 }
 function closeMembersSheet() {
   document.getElementById('sheet-members').classList.add('hidden');
+}
+
+// ---------------- Sheet: elegir avatar ----------------
+
+function openAvatarPicker() {
+  const grid = document.getElementById('avatar-picker-grid');
+  const current = AppState.profile?.avatar_id || DEFAULT_AVATAR_ID;
+  grid.innerHTML = AVATAR_IDS.map(id => `
+    <button class="avatar-option ${id === current ? 'selected' : ''}" data-pick-avatar="${id}">
+      <img src="${avatarUrl(id)}" alt="${id}">
+    </button>`).join('');
+  grid.querySelectorAll('[data-pick-avatar]').forEach(btn => {
+    btn.addEventListener('click', () => saveAvatar(btn.dataset.pickAvatar));
+  });
+  document.getElementById('sheet-avatar-picker').classList.remove('hidden');
+}
+
+function closeAvatarPicker() {
+  document.getElementById('sheet-avatar-picker').classList.add('hidden');
+}
+
+async function saveAvatar(avatarId) {
+  if (!AppState.profile || AppState.profile.avatar_id === avatarId) {
+    closeAvatarPicker();
+    return;
+  }
+  const previous = AppState.profile.avatar_id;
+  // Optimista
+  AppState.profile.avatar_id = avatarId;
+  document.getElementById('profile-avatar-img').src = avatarUrl(avatarId);
+  updateNavAvatar();
+  closeAvatarPicker();
+
+  const { error } = await supabaseClient
+    .from('profiles')
+    .update({ avatar_id: avatarId })
+    .eq('id', AppState.session.user.id);
+
+  if (error) {
+    AppState.profile.avatar_id = previous;
+    document.getElementById('profile-avatar-img').src = avatarUrl(previous);
+    updateNavAvatar();
+    showToast('No se pudo guardar el avatar.');
+    return;
+  }
+  showToast('Avatar actualizado');
+  await loadMembers();
+  renderShoppingScreen();
 }
 
 // ---------------- Salir / eliminar grupo ----------------

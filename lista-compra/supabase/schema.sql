@@ -12,6 +12,7 @@ create extension if not exists "pgcrypto";
 create table if not exists public.profiles (
   id uuid primary key references auth.users(id) on delete cascade,
   name text not null default 'Usuario',
+  avatar_id text not null default 'apple',
   created_at timestamptz not null default now()
 );
 
@@ -22,8 +23,12 @@ language plpgsql
 security definer set search_path = public
 as $$
 begin
-  insert into public.profiles (id, name)
-  values (new.id, coalesce(new.raw_user_meta_data->>'name', split_part(new.email, '@', 1)));
+  insert into public.profiles (id, name, avatar_id)
+  values (
+    new.id,
+    coalesce(new.raw_user_meta_data->>'name', split_part(new.email, '@', 1)),
+    'apple'
+  );
   return new;
 end;
 $$;
@@ -235,6 +240,7 @@ alter publication supabase_realtime add table public.shopping_list;
 alter publication supabase_realtime add table public.foods;
 alter publication supabase_realtime add table public.categories;
 alter publication supabase_realtime add table public.group_members;
+alter publication supabase_realtime add table public.profiles;
 
 -- REPLICA IDENTITY FULL: imprescindible para que los eventos UPDATE
 -- y, sobre todo, DELETE incluyan todas las columnas (incluida group_id),
@@ -323,16 +329,16 @@ as $$
   order by g.created_at;
 $$;
 
--- Listar miembros de un grupo (nombre, email, si es propietario)
+-- Listar miembros de un grupo (nombre, avatar, email, si es propietario)
 create or replace function public.get_group_members(target_group_id uuid)
 returns table (
-  user_id uuid, name text, email text, is_owner boolean, joined_at timestamptz
+  user_id uuid, name text, avatar_id text, email text, is_owner boolean, joined_at timestamptz
 )
 language sql
 security definer set search_path = public
 stable
 as $$
-  select p.id, p.name, u.email, (g.created_by = p.id) as is_owner, gm.joined_at
+  select p.id, p.name, p.avatar_id, u.email, (g.created_by = p.id) as is_owner, gm.joined_at
   from public.group_members gm
   join public.profiles p on p.id = gm.user_id
   join auth.users u on u.id = p.id

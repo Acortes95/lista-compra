@@ -24,6 +24,10 @@ const AppState = {
     const m = this.members.find(m => m.user_id === userId);
     return m ? m.name : null;
   },
+  memberAvatar(userId) {
+    const m = this.members.find(m => m.user_id === userId);
+    return m ? m.avatar_id : DEFAULT_AVATAR_ID;
+  },
 
   categoryById(id) {
     return this.categories.find(c => c.id === id);
