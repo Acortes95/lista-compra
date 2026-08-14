@@ -22,7 +22,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@600;700;800&display=swap" rel="stylesheet">
 
-<link rel="stylesheet" href="css/styles.css?v=4">
+<link rel="stylesheet" href="css/styles.css?v=5">
 </head>
 <body>
 
@@ -141,12 +141,19 @@
         </div>
 
         <div class="setup-card">
-          <h3>Tu grupo</h3>
-          <div class="settings-row">
-            <span class="label">Código de invitación</span>
-            <span id="settings-invite-code">—</span>
-          </div>
-          <p style="margin-top:10px">Comparte este código con tu pareja para que se una al mismo grupo.</p>
+          <h3>Mis grupos</h3>
+          <div id="my-groups-list"></div>
+          <button class="btn btn-secondary" id="btn-open-add-group" style="width:100%; margin-top:10px;">+ Añadir grupo</button>
+        </div>
+
+        <div class="setup-card hidden" id="active-group-card">
+          <h3>Grupo actual</h3>
+          <div id="active-group-name" style="font-weight:700; margin-bottom:8px; font-size:15px;">—</div>
+          <div class="invite-code" id="settings-invite-code">—</div>
+          <p>Comparte este código para invitar a alguien a este grupo.</p>
+          <button class="btn btn-secondary" id="btn-view-members" style="width:100%; margin-top:10px;">👥 Ver miembros</button>
+          <button class="btn btn-danger" id="btn-leave-group" style="width:100%; margin-top:8px;">Salir de este grupo</button>
+          <button class="btn btn-danger hidden" id="btn-delete-group" style="width:100%; margin-top:8px;">Eliminar este grupo</button>
         </div>
 
         <button id="btn-logout" class="btn btn-danger" style="width:100%; margin-top:6px;">Cerrar sesión</button>
@@ -222,17 +229,72 @@
   </div>
 </div>
 
+<!-- ============ SHEET: Add group (create / join) ============ -->
+<div id="sheet-add-group" class="sheet-backdrop hidden">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <h2>Añadir grupo</h2>
+
+    <div class="auth-tabs">
+      <button class="auth-tab active" data-group-tab="create">Crear</button>
+      <button class="auth-tab" data-group-tab="join">Unirme</button>
+    </div>
+
+    <div id="add-group-error" class="error-msg hidden"></div>
+
+    <form id="form-create-group-sheet">
+      <div class="field">
+        <label for="sheet-new-group-name">Nombre del grupo</label>
+        <input id="sheet-new-group-name" type="text" placeholder="Ej. Casa, Piso, Familia...">
+      </div>
+      <div class="sheet-actions">
+        <button type="button" class="btn btn-secondary" data-close-add-group>Cancelar</button>
+        <button type="submit" class="btn btn-primary">Crear</button>
+      </div>
+    </form>
+
+    <form id="form-join-group-sheet" class="hidden">
+      <div class="field">
+        <label for="sheet-join-group-code">Código de invitación</label>
+        <input id="sheet-join-group-code" type="text" autocapitalize="off" placeholder="Ej. a1b2c3d4">
+      </div>
+      <div class="sheet-actions">
+        <button type="button" class="btn btn-secondary" data-close-add-group>Cancelar</button>
+        <button type="submit" class="btn btn-primary">Unirme</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ============ SHEET: Members ============ -->
+<div id="sheet-members" class="sheet-backdrop hidden">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <h2>👥 Miembros</h2>
+    <div id="members-list"></div>
+  </div>
+</div>
+
+<!-- ============ SHEET: Assign product ============ -->
+<div id="sheet-assign" class="sheet-backdrop hidden">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <h2>Asignar a</h2>
+    <div id="assign-list"></div>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="js/config.js?v=4"></script>
-<script src="js/supabaseClient.js?v=4"></script>
-<script src="js/state.js?v=4"></script>
-<script src="js/toast.js?v=4"></script>
-<script src="js/auth.js?v=4"></script>
-<script src="js/groupSetup.js?v=4"></script>
-<script src="js/foods.js?v=4"></script>
-<script src="js/shopping.js?v=4"></script>
-<script src="js/realtime.js?v=4"></script>
-<script src="js/settings.js?v=4"></script>
-<script src="js/app.js?v=4"></script>
+<script src="js/config.js?v=5"></script>
+<script src="js/supabaseClient.js?v=5"></script>
+<script src="js/state.js?v=5"></script>
+<script src="js/toast.js?v=5"></script>
+<script src="js/auth.js?v=5"></script>
+<script src="js/groupSetup.js?v=5"></script>
+<script src="js/foods.js?v=5"></script>
+<script src="js/shopping.js?v=5"></script>
+<script src="js/realtime.js?v=5"></script>
+<script src="js/settings.js?v=5"></script>
+<script src="js/app.js?v=5"></script>
 </body>
 </html>

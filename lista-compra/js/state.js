@@ -5,7 +5,9 @@
 const AppState = {
   session: null,
   profile: null,
-  group: null,          // { id, name, invite_code }
+  group: null,          // { id, name, invite_code, is_owner }
+  myGroups: [],           // [{group_id, name, invite_code, is_owner, member_count}]
+  members: [],             // miembros del grupo activo [{user_id, name, email, is_owner}]
   categories: [],        // [{id, name, icon, sort_order}]
   foods: [],              // catálogo completo (sin deleted_at)
   shoppingList: [],       // filas de shopping_list + join de food
@@ -15,6 +17,12 @@ const AppState = {
   uiState: {
     collapsedFoodCategories: new Set(),
     collapsedShoppingCategories: new Set()
+  },
+
+  memberName(userId) {
+    if (!userId) return null;
+    const m = this.members.find(m => m.user_id === userId);
+    return m ? m.name : null;
   },
 
   categoryById(id) {

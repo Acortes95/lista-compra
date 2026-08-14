@@ -33,7 +33,21 @@ function subscribeRealtime() {
         renderShoppingScreen();
       }
     )
-    .subscribe();
+    .on('postgres_changes',
+      { event: '*', schema: 'public', table: 'group_members', filter: `group_id=eq.${AppState.group.id}` },
+      async () => {
+        await loadMembers();
+        await loadMyGroups();
+        renderSettingsScreen();
+      }
+    )
+    .subscribe((status, err) => {
+      if (status === 'SUBSCRIBED') {
+        console.log('[realtime] conectado al grupo', AppState.group.id);
+      } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+        console.warn('[realtime] problema de conexión:', status, err);
+      }
+    });
 }
 
 function unsubscribeRealtime() {

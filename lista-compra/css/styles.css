@@ -261,7 +261,8 @@ a { color: inherit; }
   color: #fff;
 }
 
-.item-body { flex: 1; min-width: 0; }
+.item-body { flex: 1; min-width: 0; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.item-body:active { opacity: 0.7; }
 
 .item-name {
   font-weight: 600;

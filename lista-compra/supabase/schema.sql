@@ -108,7 +108,8 @@ create table if not exists public.shopping_list (
   purchased boolean not null default false,
   created_at timestamptz not null default now(),
   purchased_at timestamptz,
-  added_by uuid references public.profiles(id)
+  added_by uuid references public.profiles(id),
+  assigned_to uuid references public.profiles(id) on delete set null
 );
 
 create index if not exists shopping_list_group_idx on public.shopping_list(group_id);
@@ -158,6 +159,10 @@ create policy "groups_insert_authenticated"
 create policy "groups_update_member"
   on public.groups for update
   using (public.is_member_of_group(id));
+
+create policy "groups_delete_owner"
+  on public.groups for delete
+  using (created_by = auth.uid());
 
 -- GROUP_MEMBERS: un usuario ve los miembros de sus propios grupos.
 create policy "group_members_select_own_groups"
@@ -231,6 +236,15 @@ alter publication supabase_realtime add table public.foods;
 alter publication supabase_realtime add table public.categories;
 alter publication supabase_realtime add table public.group_members;
 
+-- REPLICA IDENTITY FULL: imprescindible para que los eventos UPDATE
+-- y, sobre todo, DELETE incluyan todas las columnas (incluida group_id),
+-- que es lo que usamos para filtrar los cambios por grupo en el cliente.
+-- Sin esto, solo llegan bien los INSERT.
+alter table public.shopping_list replica identity full;
+alter table public.foods replica identity full;
+alter table public.categories replica identity full;
+alter table public.group_members replica identity full;
+
 -- ============================================================
 -- Categorías iniciales — se insertan por grupo al crear el grupo
 -- (ver función create_group_with_defaults más abajo, usada desde la app)
@@ -289,5 +303,72 @@ begin
   on conflict do nothing;
 
   return target_group_id;
+end;
+$$;
+
+-- Listar "Mis grupos" (rol y nº de miembros)
+create or replace function public.get_my_groups()
+returns table (
+  group_id uuid, name text, invite_code text, is_owner boolean, member_count bigint
+)
+language sql
+security definer set search_path = public
+stable
+as $$
+  select g.id, g.name, g.invite_code, (g.created_by = auth.uid()) as is_owner,
+    (select count(*) from public.group_members gm2 where gm2.group_id = g.id) as member_count
+  from public.groups g
+  join public.group_members gm on gm.group_id = g.id
+  where gm.user_id = auth.uid()
+  order by g.created_at;
+$$;
+
+-- Listar miembros de un grupo (nombre, email, si es propietario)
+create or replace function public.get_group_members(target_group_id uuid)
+returns table (
+  user_id uuid, name text, email text, is_owner boolean, joined_at timestamptz
+)
+language sql
+security definer set search_path = public
+stable
+as $$
+  select p.id, p.name, u.email, (g.created_by = p.id) as is_owner, gm.joined_at
+  from public.group_members gm
+  join public.profiles p on p.id = gm.user_id
+  join auth.users u on u.id = p.id
+  join public.groups g on g.id = gm.group_id
+  where gm.group_id = target_group_id
+    and public.is_member_of_group(target_group_id)
+  order by gm.joined_at;
+$$;
+
+-- Salir de un grupo (con traspaso de propiedad automático si eras el dueño)
+create or replace function public.leave_group(target_group_id uuid)
+returns void
+language plpgsql
+security definer set search_path = public
+as $$
+declare
+  was_owner boolean;
+  next_owner uuid;
+begin
+  select (created_by = auth.uid()) into was_owner from public.groups where id = target_group_id;
+
+  delete from public.group_members
+  where group_id = target_group_id and user_id = auth.uid();
+
+  if was_owner then
+    select user_id into next_owner
+    from public.group_members
+    where group_id = target_group_id
+    order by joined_at
+    limit 1;
+
+    if next_owner is not null then
+      update public.groups set created_by = next_owner where id = target_group_id;
+    else
+      delete from public.groups where id = target_group_id;
+    end if;
+  end if;
 end;
 $$;

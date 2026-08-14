@@ -3,22 +3,22 @@
 // al instante y funcione mínimamente sin conexión.
 // Los datos siempre vienen de Supabase (network), nunca de caché.
 // ============================================================
-const CACHE_NAME = 'lista-compra-v4';
+const CACHE_NAME = 'lista-compra-v5';
 const SHELL_FILES = [
   './',
   './index.html',
-  './css/styles.css?v=4',
-  './js/config.js?v=4',
-  './js/supabaseClient.js?v=4',
-  './js/state.js?v=4',
-  './js/toast.js?v=4',
-  './js/auth.js?v=4',
-  './js/groupSetup.js?v=4',
-  './js/foods.js?v=4',
-  './js/shopping.js?v=4',
-  './js/realtime.js?v=4',
-  './js/settings.js?v=4',
-  './js/app.js?v=4',
+  './css/styles.css?v=5',
+  './js/config.js?v=5',
+  './js/supabaseClient.js?v=5',
+  './js/state.js?v=5',
+  './js/toast.js?v=5',
+  './js/auth.js?v=5',
+  './js/groupSetup.js?v=5',
+  './js/foods.js?v=5',
+  './js/shopping.js?v=5',
+  './js/realtime.js?v=5',
+  './js/settings.js?v=5',
+  './js/app.js?v=5',
   './manifest.json'
 ];
 

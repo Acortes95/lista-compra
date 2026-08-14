@@ -36,15 +36,15 @@ async function loadProfile() {
   if (!error) AppState.profile = data;
 }
 
-// Se ejecuta una vez que sabemos que el usuario ya tiene grupo asignado
+// Se ejecuta una vez que sabemos que el usuario ya tiene grupo asignado.
+// Solo carga datos y renderiza — la navegación la decide quien llama.
 async function bootAfterGroup() {
   showScreen('loading');
-  await Promise.all([loadCategories(), loadFoods(), loadShoppingList()]);
+  await Promise.all([loadCategories(), loadFoods(), loadShoppingList(), loadMembers()]);
   renderShoppingScreen();
   renderFoodsScreen();
   renderSettingsScreen();
   subscribeRealtime();
-  showScreen('shopping');
 }
 
 async function bootApp() {
@@ -59,15 +59,17 @@ async function bootApp() {
   }
 
   await loadProfile();
-  const existingGroup = await findExistingGroup();
+  await loadMyGroups();
 
-  if (!existingGroup) {
+  if (!AppState.myGroups.length) {
     showScreen('group-setup');
     return;
   }
 
-  AppState.group = existingGroup;
-  await bootAfterGroup();
+  const savedId = getSavedActiveGroupId();
+  const target = AppState.myGroups.find(g => g.group_id === savedId) || AppState.myGroups[0];
+  await selectActiveGroupAndBoot(target.group_id);
+  showScreen('shopping');
 }
 
 function resetAppState() {
@@ -75,6 +77,8 @@ function resetAppState() {
   AppState.session = null;
   AppState.profile = null;
   AppState.group = null;
+  AppState.myGroups = [];
+  AppState.members = [];
   AppState.categories = [];
   AppState.foods = [];
   AppState.shoppingList = [];

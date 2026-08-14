@@ -5,7 +5,7 @@
 async function loadShoppingList() {
   const { data, error } = await supabaseClient
     .from('shopping_list')
-    .select('id, food_id, quantity, purchased, created_at, purchased_at, added_by, foods(id, name, unit, category_id)')
+    .select('id, food_id, quantity, purchased, created_at, purchased_at, added_by, assigned_to, foods(id, name, unit, category_id)')
     .eq('group_id', AppState.group.id)
     .order('created_at');
   if (!error) AppState.shoppingList = data;
@@ -15,6 +15,9 @@ function initShoppingScreen() {
   document.getElementById('fab-add-item').addEventListener('click', openQuickAddSheet);
   document.getElementById('sheet-quick-add').addEventListener('click', (e) => {
     if (e.target.id === 'sheet-quick-add') closeQuickAddSheet();
+  });
+  document.getElementById('sheet-assign').addEventListener('click', (e) => {
+    if (e.target.id === 'sheet-assign') closeAssignSheet();
   });
 }
 
@@ -217,12 +220,14 @@ function renderShoppingScreen() {
 function renderItemRow(item, pal) {
   const name = item.foods?.name || '(eliminado)';
   const unit = item.foods?.unit || '';
+  const assignedName = AppState.memberName(item.assigned_to);
+  const assignedLabel = assignedName ? `👤 ${escapeHtml(assignedName)}` : 'Sin asignar';
   return `
     <div class="item-row ${item.purchased ? 'purchased' : ''}" style="--cat-color:${pal.color}">
       <button class="item-check ${item.purchased ? 'checked' : ''}" data-toggle="${item.id}">✓</button>
-      <div class="item-body">
+      <div class="item-body" data-assign="${item.id}">
         <div class="item-name">${escapeHtml(name)}</div>
-        <div class="item-meta">${formatQty(item.quantity)} ${escapeHtml(unit)}</div>
+        <div class="item-meta">${formatQty(item.quantity)} ${escapeHtml(unit)} · ${assignedLabel}</div>
       </div>
       ${!item.purchased ? `
       <div class="qty-stepper">
@@ -255,11 +260,61 @@ function attachShoppingListeners(container) {
   container.querySelectorAll('[data-delete]').forEach(btn => {
     btn.addEventListener('click', () => deleteShoppingItem(btn.dataset.delete));
   });
+  container.querySelectorAll('[data-assign]').forEach(el => {
+    el.addEventListener('click', () => openAssignSheet(el.dataset.assign));
+  });
   const clearBtn = document.getElementById('btn-clear-purchased');
   if (clearBtn) clearBtn.addEventListener('click', clearPurchased);
   container.querySelectorAll('[data-cat-toggle]').forEach(el => {
     el.addEventListener('click', () => toggleShoppingCategory(el.dataset.catToggle));
   });
+}
+
+async function updateAssignment(itemId, userId) {
+  // Optimista
+  const item = AppState.shoppingList.find(i => i.id === itemId);
+  if (item) item.assigned_to = userId;
+  renderShoppingScreen();
+  closeAssignSheet();
+
+  const { error } = await supabaseClient
+    .from('shopping_list')
+    .update({ assigned_to: userId })
+    .eq('id', itemId);
+
+  if (error) {
+    showToast('No se pudo asignar el producto.');
+    await loadShoppingList();
+    renderShoppingScreen();
+  }
+}
+
+function openAssignSheet(itemId) {
+  const item = AppState.shoppingList.find(i => i.id === itemId);
+  if (!item) return;
+  const list = document.getElementById('assign-list');
+
+  const rows = [{ user_id: null, name: 'Sin asignar' }, ...AppState.members];
+
+  list.innerHTML = rows.map(m => {
+    const selected = (item.assigned_to || null) === (m.user_id || null);
+    return `
+      <div class="settings-row" data-pick-assignee="${m.user_id ?? ''}" style="cursor:pointer;">
+        <span style="${selected ? 'font-weight:700;' : ''}">${selected ? '✓ ' : ''}${escapeHtml(m.name)}</span>
+      </div>`;
+  }).join('');
+
+  list.querySelectorAll('[data-pick-assignee]').forEach(row => {
+    row.addEventListener('click', () => {
+      updateAssignment(itemId, row.dataset.pickAssignee || null);
+    });
+  });
+
+  document.getElementById('sheet-assign').classList.remove('hidden');
+}
+
+function closeAssignSheet() {
+  document.getElementById('sheet-assign').classList.add('hidden');
 }
 
 function toggleShoppingCategory(catId) {
