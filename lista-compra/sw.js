@@ -3,23 +3,23 @@
 // al instante y funcione mínimamente sin conexión.
 // Los datos siempre vienen de Supabase (network), nunca de caché.
 // ============================================================
-const CACHE_NAME = 'lista-compra-v8';
+const CACHE_NAME = 'lista-compra-v9';
 const SHELL_FILES = [
   './',
   './index.html',
-  './css/styles.css?v=8',
-  './js/config.js?v=8',
-  './js/supabaseClient.js?v=8',
-  './js/avatars.js?v=8',
-  './js/state.js?v=8',
-  './js/toast.js?v=8',
-  './js/auth.js?v=8',
-  './js/groupSetup.js?v=8',
-  './js/foods.js?v=8',
-  './js/shopping.js?v=8',
-  './js/realtime.js?v=8',
-  './js/settings.js?v=8',
-  './js/app.js?v=8',
+  './css/styles.css?v=9',
+  './js/config.js?v=9',
+  './js/supabaseClient.js?v=9',
+  './js/avatars.js?v=9',
+  './js/state.js?v=9',
+  './js/toast.js?v=9',
+  './js/auth.js?v=9',
+  './js/groupSetup.js?v=9',
+  './js/foods.js?v=9',
+  './js/shopping.js?v=9',
+  './js/realtime.js?v=9',
+  './js/settings.js?v=9',
+  './js/app.js?v=9',
   './icons/avatars/apple.png',
   './icons/avatars/banana.png',
   './icons/avatars/avocado.png',
