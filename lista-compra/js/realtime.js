@@ -42,6 +42,20 @@ function subscribeRealtime() {
       }
     )
     .on('postgres_changes',
+      { event: '*', schema: 'public', table: 'tasks', filter: `group_id=eq.${AppState.group.id}` },
+      async () => {
+        await loadTasks();
+        renderTasksScreen();
+      }
+    )
+    .on('postgres_changes',
+      { event: '*', schema: 'public', table: 'task_list_items', filter: `group_id=eq.${AppState.group.id}` },
+      async () => {
+        await loadTasks();
+        renderTasksScreen();
+      }
+    )
+    .on('postgres_changes',
       { event: 'UPDATE', schema: 'public', table: 'profiles' },
       async (payload) => {
         if (payload.new && payload.new.id === AppState.session.user.id) {

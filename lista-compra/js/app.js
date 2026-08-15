@@ -2,14 +2,14 @@
 // App — arranque, navegación entre pantallas, auth state
 // ============================================================
 
-const SCREENS = ['auth', 'group-setup', 'shopping', 'foods', 'settings', 'loading'];
+const SCREENS = ['auth', 'group-setup', 'shopping', 'foods', 'tasks', 'settings', 'loading'];
 
 function showScreen(name) {
   SCREENS.forEach(s => {
     document.getElementById(`screen-${s}`).classList.toggle('hidden', s !== name);
   });
   const nav = document.getElementById('bottom-nav');
-  const showNav = ['shopping', 'foods', 'settings'].includes(name);
+  const showNav = ['shopping', 'foods', 'tasks', 'settings'].includes(name);
   nav.classList.toggle('hidden', !showNav);
   if (showNav) {
     document.querySelectorAll('.nav-btn').forEach(btn => {
@@ -23,6 +23,7 @@ function initBottomNav() {
     btn.addEventListener('click', () => {
       showScreen(btn.dataset.screen);
       if (btn.dataset.screen === 'settings') renderSettingsScreen();
+      if (btn.dataset.screen === 'tasks') renderTasksScreen();
     });
   });
 }
@@ -46,11 +47,13 @@ function updateNavAvatar() {
 // Solo carga datos y renderiza — la navegación la decide quien llama.
 async function bootAfterGroup() {
   showScreen('loading');
-  await Promise.all([loadCategories(), loadFoods(), loadShoppingList(), loadMembers()]);
+  await Promise.all([loadCategories(), loadFoods(), loadShoppingList(), loadMembers(), loadTasks()]);
   renderShoppingScreen();
   renderFoodsScreen();
   renderSettingsScreen();
+  renderTasksScreen();
   subscribeRealtime();
+  startReminderWatch();
 }
 
 async function bootApp() {
@@ -80,6 +83,7 @@ async function bootApp() {
 
 function resetAppState() {
   unsubscribeRealtime();
+  stopReminderWatch();
   AppState.session = null;
   AppState.profile = null;
   AppState.group = null;
@@ -88,6 +92,8 @@ function resetAppState() {
   AppState.categories = [];
   AppState.foods = [];
   AppState.shoppingList = [];
+  AppState.tasks = [];
+  AppState.taskListItems = [];
   updateNavAvatar();
 }
 
@@ -96,6 +102,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initGroupSetupScreen();
   initFoodsScreen();
   initShoppingScreen();
+  initTasksScreen();
   initSettingsScreen();
   initBottomNav();
 

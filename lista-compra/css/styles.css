@@ -431,6 +431,8 @@ a { color: inherit; }
   flex-wrap: wrap;
 }
 
+.meta-sep { color: var(--line-strong); }
+
 .assign-chip {
   display: inline-flex;
   align-items: center;
@@ -853,6 +855,252 @@ a { color: inherit; }
   pointer-events: none;
 }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ---------------- Tareas ---------------- */
+
+.tasks-view-toggle {
+  display: flex;
+  gap: 6px;
+  padding: 0 16px 12px;
+}
+
+.segmented-btn {
+  flex: 1;
+  padding: 8px;
+  border-radius: var(--radius-s);
+  background: var(--paper-dim);
+  border: 1.5px solid var(--line);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink-soft);
+}
+.segmented-btn.active {
+  background: var(--ink);
+  color: var(--paper);
+  border-color: var(--ink);
+}
+
+/* Vista lista: agrupado por fecha */
+
+.task-date-group { margin-bottom: 20px; }
+
+.task-date-header {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ink-soft);
+  padding: 4px 2px;
+  margin-bottom: 6px;
+  border-bottom: 2px solid var(--line);
+}
+
+.task-row.task-done {
+  opacity: 0.55;
+}
+.task-row.task-done .item-name {
+  text-decoration: line-through;
+  text-decoration-thickness: 1.5px;
+}
+
+.task-list-progress {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--ink-soft);
+  background: var(--paper-dim);
+  border-radius: 999px;
+  padding: 4px 9px;
+  white-space: nowrap;
+}
+
+.task-type-icon {
+  width: 26px;
+  height: 26px;
+  min-width: 26px;
+  border-radius: 50%;
+  background: var(--paper-dim);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+}
+
+/* Selector de tipo de tarea (píldoras) */
+
+.type-selector {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.type-pill {
+  padding: 9px 13px;
+  border-radius: 999px;
+  background: var(--paper-dim);
+  border: 1.5px solid var(--line);
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.type-pill.active {
+  background: var(--ink);
+  color: var(--paper);
+  border-color: var(--ink);
+}
+.type-pill:disabled {
+  opacity: 0.5;
+}
+
+/* Selector de días de la semana (recurrencia) */
+
+.weekday-selector {
+  display: flex;
+  gap: 6px;
+}
+
+.weekday-pill {
+  flex: 1;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--paper-dim);
+  border: 1.5px solid var(--line);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink-soft);
+}
+.weekday-pill.active {
+  background: var(--butter);
+  color: #fff;
+  border-color: var(--butter);
+}
+
+/* Elementos de lista siendo creados en el formulario */
+
+.draft-item-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  background: var(--paper-dim);
+  border-radius: var(--radius-s);
+  margin-bottom: 6px;
+  font-size: 14px;
+}
+
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 6px 0 10px;
+}
+.checkbox-row input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+}
+
+.field-hint {
+  font-size: 12px;
+  color: var(--ink-soft);
+  margin: 2px 0 10px;
+  line-height: 1.4;
+}
+
+/* Vista calendario */
+
+.calendar-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 4px 16px 10px;
+}
+
+.calendar-month-label {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 17px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 6px 14px;
+  border-radius: var(--radius-s);
+  min-width: 190px;
+  text-align: center;
+}
+.calendar-month-label:active { background: var(--paper-dim); }
+
+.calendar-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  padding: 0 16px;
+  margin-bottom: 4px;
+}
+.calendar-weekdays span {
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ink-soft);
+  font-weight: 700;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  padding: 0 16px 90px;
+}
+
+.calendar-day {
+  aspect-ratio: 1;
+  border-radius: var(--radius-s);
+  background: var(--paper);
+  box-shadow: var(--shadow-card);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  position: relative;
+}
+.calendar-day.empty { background: transparent; box-shadow: none; }
+
+.calendar-day-num {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.calendar-day.today {
+  border: 1.5px solid var(--ink);
+}
+.calendar-day.today .calendar-day-num {
+  font-weight: 800;
+}
+
+.calendar-day.has-activity {
+  background: var(--plum-bg);
+}
+
+.calendar-day-badge {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 3px;
+  border-radius: 999px;
+  background: var(--coral);
+  color: #fff;
+  font-size: 9.5px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
 
 /* ---------------- Loading ---------------- */
 

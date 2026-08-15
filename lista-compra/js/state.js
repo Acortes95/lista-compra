@@ -11,12 +11,18 @@ const AppState = {
   categories: [],        // [{id, name, icon, sort_order}]
   foods: [],              // catálogo completo (sin deleted_at)
   shoppingList: [],       // filas de shopping_list + join de food
+  tasks: [],                // tareas del grupo activo (sin deleted_at)
+  taskListItems: [],         // elementos de tareas tipo "lista"
   channel: null,          // canal realtime activo
 
-  // Categorías plegadas por pantalla (solo visual, no se guarda en la BD)
+  // Categorías plegadas, vista de tareas y mes visible del calendario
+  // (solo visual, no se guarda en la BD)
   uiState: {
     collapsedFoodCategories: new Set(),
-    collapsedShoppingCategories: new Set()
+    collapsedShoppingCategories: new Set(),
+    tasksView: 'list',
+    calendarYear: new Date().getFullYear(),
+    calendarMonth: new Date().getMonth() // 0-11
   },
 
   memberName(userId) {
@@ -34,6 +40,14 @@ const AppState = {
   },
   foodById(id) {
     return this.foods.find(f => f.id === id);
+  },
+  taskById(id) {
+    return this.tasks.find(t => t.id === id);
+  },
+  itemsForTask(taskId) {
+    return this.taskListItems
+      .filter(i => i.task_id === taskId)
+      .sort((a, b) => a.sort_order - b.sort_order);
   }
 };
 
@@ -61,3 +75,12 @@ function categoryColor(categoryId) {
   if (idx === -1) return CATEGORY_PALETTE[CATEGORY_PALETTE.length - 1];
   return CATEGORY_PALETTE[idx % CATEGORY_PALETTE.length];
 }
+
+// ---------------- Tipos de tarea ----------------
+const TASK_TYPE_META = {
+  basica:     { icon: '✅', label: 'Básica',    color: '#3f7d4e' },
+  lista:      { icon: '📝', label: 'Lista',      color: '#3a5f8a' },
+  recurrente: { icon: '🔁', label: 'Recurrente', color: '#b9822a' },
+  gestion:    { icon: '🔔', label: 'Gestión',    color: '#b6472f' },
+  actividad:  { icon: '🎉', label: 'Actividad',  color: '#6b4a7a' }
+};

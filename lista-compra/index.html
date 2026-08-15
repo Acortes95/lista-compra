@@ -22,7 +22,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@600;700;800&display=swap" rel="stylesheet">
 
-<link rel="stylesheet" href="css/styles.css?v=9">
+<link rel="stylesheet" href="css/styles.css?v=10">
 </head>
 <body>
 
@@ -124,6 +124,39 @@
       <button class="fab" id="fab-add-food" aria-label="Nuevo alimento">+</button>
     </section>
 
+    <!-- ============ TASKS ============ -->
+    <section id="screen-tasks" class="screen hidden">
+      <div class="topbar">
+        <div class="topbar-inner">
+          <h1>📋 Tareas</h1>
+        </div>
+        <div class="tasks-view-toggle">
+          <button class="segmented-btn active" data-tasks-view="list">Lista</button>
+          <button class="segmented-btn" data-tasks-view="calendar">Calendario</button>
+        </div>
+      </div>
+
+      <!-- Vista lista -->
+      <div id="tasks-list-view">
+        <div id="tasks-list-content" style="padding-top:14px"></div>
+      </div>
+
+      <!-- Vista calendario -->
+      <div id="tasks-calendar-view" class="hidden">
+        <div class="calendar-nav">
+          <button class="icon-btn" id="btn-cal-prev">‹</button>
+          <button class="calendar-month-label" id="btn-cal-month-label">—</button>
+          <button class="icon-btn" id="btn-cal-next">›</button>
+        </div>
+        <div class="calendar-weekdays">
+          <span>L</span><span>M</span><span>X</span><span>J</span><span>V</span><span>S</span><span>D</span>
+        </div>
+        <div id="calendar-grid" class="calendar-grid"></div>
+      </div>
+
+      <button class="fab" id="fab-add-task" aria-label="Añadir tarea">+</button>
+    </section>
+
     <!-- ============ SETTINGS ============ -->
     <section id="screen-settings" class="screen hidden">
       <div class="topbar"><div class="topbar-inner"><h1>⚙️ Cuenta</h1></div></div>
@@ -173,6 +206,9 @@
       </button>
       <button class="nav-btn" data-screen="foods">
         <span class="icon">🥦</span><span>Alimentos</span>
+      </button>
+      <button class="nav-btn" data-screen="tasks">
+        <span class="icon">📋</span><span>Tareas</span>
       </button>
       <button class="nav-btn" data-screen="settings">
         <img class="nav-avatar-icon" id="nav-avatar-icon" src="icons/avatars/apple.png" alt="">
@@ -295,18 +331,208 @@
   </div>
 </div>
 
+<!-- ============ SHEET: Crear/editar tarea ============ -->
+<div id="sheet-task" class="sheet-backdrop hidden">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <h2 id="task-sheet-title">Nueva tarea</h2>
+    <form id="form-task">
+      <input type="hidden" id="task-id">
+
+      <div class="field">
+        <label>Tipo de tarea</label>
+        <div class="type-selector" id="task-type-selector">
+          <button type="button" class="type-pill active" data-task-type="basica">✅ Básica</button>
+          <button type="button" class="type-pill" data-task-type="lista">📝 Lista</button>
+          <button type="button" class="type-pill" data-task-type="recurrente">🔁 Recurrente</button>
+          <button type="button" class="type-pill" data-task-type="gestion">🔔 Gestión</button>
+          <button type="button" class="type-pill" data-task-type="actividad">🎉 Actividad</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="task-title">Título</label>
+        <input id="task-title" type="text" required placeholder="Ej. Fregar los platos">
+      </div>
+
+      <div class="field">
+        <label for="task-description">Descripción (opcional)</label>
+        <textarea id="task-description" placeholder="Detalles adicionales..."></textarea>
+      </div>
+
+      <div id="task-date-single" class="field">
+        <label for="task-date">Fecha</label>
+        <input id="task-date" type="date" required>
+      </div>
+
+      <div id="task-date-range" class="field-row hidden">
+        <div class="field">
+          <label for="task-date-start">Fecha de inicio</label>
+          <input id="task-date-start" type="date">
+        </div>
+        <div class="field">
+          <label for="task-date-end">Fecha de fin</label>
+          <input id="task-date-end" type="date">
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label for="task-time-start">Hora inicio (opcional)</label>
+          <input id="task-time-start" type="time">
+        </div>
+        <div class="field">
+          <label for="task-time-end">Hora fin (opcional)</label>
+          <input id="task-time-end" type="time">
+        </div>
+      </div>
+
+      <!-- Solo tipo recurrente -->
+      <div id="task-recurrence-fields" class="hidden">
+        <div class="field">
+          <label>Repetir los días</label>
+          <div class="weekday-selector" id="task-weekday-selector">
+            <button type="button" class="weekday-pill" data-day="1">L</button>
+            <button type="button" class="weekday-pill" data-day="2">M</button>
+            <button type="button" class="weekday-pill" data-day="3">X</button>
+            <button type="button" class="weekday-pill" data-day="4">J</button>
+            <button type="button" class="weekday-pill" data-day="5">V</button>
+            <button type="button" class="weekday-pill" data-day="6">S</button>
+            <button type="button" class="weekday-pill" data-day="0">D</button>
+          </div>
+        </div>
+        <div class="field">
+          <label for="task-repeat-until">Repetir hasta</label>
+          <input id="task-repeat-until" type="date">
+        </div>
+      </div>
+
+      <!-- Solo tipo gestión -->
+      <div id="task-reminder-fields" class="hidden">
+        <label class="checkbox-row">
+          <input type="checkbox" id="task-reminder-enabled">
+          <span>Activar recordatorio dentro de la app</span>
+        </label>
+        <div id="task-reminder-detail" class="field-row hidden">
+          <div class="field">
+            <label for="task-reminder-minutes">Avisar con antelación</label>
+            <select id="task-reminder-minutes">
+              <option value="0">En el momento</option>
+              <option value="15">15 minutos antes</option>
+              <option value="30">30 minutos antes</option>
+              <option value="60">1 hora antes</option>
+              <option value="1440">1 día antes</option>
+              <option value="10080">1 semana antes</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="task-reminder-repeat">Repetición</label>
+            <select id="task-reminder-repeat">
+              <option value="none">No repetir</option>
+              <option value="daily">Cada día</option>
+              <option value="weekly">Cada semana</option>
+            </select>
+          </div>
+        </div>
+        <p class="field-hint">El aviso aparece dentro de la app cuando la tengas abierta a esa hora (no es una notificación del sistema).</p>
+      </div>
+
+      <!-- Solo tipo lista -->
+      <div id="task-list-items-fields" class="hidden">
+        <div class="field">
+          <label>Elementos de la lista</label>
+          <div id="task-list-items-builder"></div>
+          <div class="field-row" style="margin-top:6px;">
+            <input id="task-new-item-input" type="text" placeholder="Añadir elemento..." style="flex:1;">
+            <button type="button" class="icon-btn" id="btn-add-task-item" style="width:44px;height:44px;background:var(--paper-dim);border-radius:var(--radius-s);">+</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="task-assigned">Asignar a</label>
+        <select id="task-assigned"></select>
+      </div>
+
+      <div class="sheet-actions">
+        <button type="button" class="btn btn-secondary" id="btn-cancel-task">Cancelar</button>
+        <button type="submit" class="btn btn-primary" id="btn-save-task">Guardar</button>
+      </div>
+      <button type="button" class="btn btn-danger hidden" id="btn-delete-task" style="width:100%; margin-top:8px;">Eliminar tarea</button>
+    </form>
+  </div>
+</div>
+
+<!-- ============ SHEET: Tareas de un día ============ -->
+<div id="sheet-day-tasks" class="sheet-backdrop hidden">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <h2 id="day-tasks-title">—</h2>
+    <div id="day-tasks-list"></div>
+    <button class="btn btn-primary" id="btn-add-task-for-day" style="width:100%; margin-top:10px;">+ Añadir tarea este día</button>
+  </div>
+</div>
+
+<!-- ============ SHEET: Checklist de tarea tipo Lista ============ -->
+<div id="sheet-task-checklist" class="sheet-backdrop hidden">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <h2 id="checklist-task-title">—</h2>
+    <p id="checklist-task-description" class="field-hint hidden"></p>
+    <div id="checklist-items-list"></div>
+    <div class="field-row" style="margin-top:10px;">
+      <input id="checklist-new-item-input" type="text" placeholder="Añadir elemento..." style="flex:1;">
+      <button type="button" class="icon-btn" id="btn-add-checklist-item" style="width:44px;height:44px;background:var(--paper-dim);border-radius:var(--radius-s);">+</button>
+    </div>
+    <div class="sheet-actions" style="margin-top:14px;">
+      <button type="button" class="btn btn-secondary" id="btn-edit-checklist-task">✏️ Editar tarea</button>
+      <button type="button" class="btn btn-danger" id="btn-delete-checklist-task">Eliminar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ SHEET: Selector de mes/año ============ -->
+<div id="sheet-month-picker" class="sheet-backdrop hidden">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <h2>Ir a mes</h2>
+    <div class="field-row">
+      <div class="field">
+        <label for="picker-month">Mes</label>
+        <select id="picker-month">
+          <option value="0">Enero</option><option value="1">Febrero</option>
+          <option value="2">Marzo</option><option value="3">Abril</option>
+          <option value="4">Mayo</option><option value="5">Junio</option>
+          <option value="6">Julio</option><option value="7">Agosto</option>
+          <option value="8">Septiembre</option><option value="9">Octubre</option>
+          <option value="10">Noviembre</option><option value="11">Diciembre</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="picker-year">Año</label>
+        <input id="picker-year" type="number" min="2020" max="2100">
+      </div>
+    </div>
+    <div class="sheet-actions">
+      <button type="button" class="btn btn-secondary" id="btn-cancel-month-picker">Cancelar</button>
+      <button type="button" class="btn btn-primary" id="btn-go-month-picker">Ir</button>
+    </div>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="js/config.js?v=9"></script>
-<script src="js/supabaseClient.js?v=9"></script>
-<script src="js/avatars.js?v=9"></script>
-<script src="js/state.js?v=9"></script>
-<script src="js/toast.js?v=9"></script>
-<script src="js/auth.js?v=9"></script>
-<script src="js/groupSetup.js?v=9"></script>
-<script src="js/foods.js?v=9"></script>
-<script src="js/shopping.js?v=9"></script>
-<script src="js/realtime.js?v=9"></script>
-<script src="js/settings.js?v=9"></script>
-<script src="js/app.js?v=9"></script>
+<script src="js/config.js?v=10"></script>
+<script src="js/supabaseClient.js?v=10"></script>
+<script src="js/avatars.js?v=10"></script>
+<script src="js/state.js?v=10"></script>
+<script src="js/toast.js?v=10"></script>
+<script src="js/auth.js?v=10"></script>
+<script src="js/groupSetup.js?v=10"></script>
+<script src="js/foods.js?v=10"></script>
+<script src="js/shopping.js?v=10"></script>
+<script src="js/tasks.js?v=10"></script>
+<script src="js/realtime.js?v=10"></script>
+<script src="js/settings.js?v=10"></script>
+<script src="js/app.js?v=10"></script>
 </body>
 </html>

@@ -22,10 +22,12 @@ Chrome en Android, además de en escritorio.
    - `anon public` key
 
 > ⚠️ **¿Ya tenías la app funcionando de antes (con `schema.sql` ya ejecutado)?**
-> Ejecuta también [`supabase/migration_v2_multigrupo.sql`](supabase/migration_v2_multigrupo.sql)
-> en el SQL Editor. Añade la asignación de productos a usuarios, la posibilidad
-> de pertenecer a varios grupos, y las funciones para gestionarlos — sin borrar
-> nada de lo que ya tenías. Solo hace falta ejecutarlo **una vez**.
+> Ejecuta también, en este orden, cada una **una sola vez**:
+> 1. [`supabase/migration_v2_multigrupo.sql`](supabase/migration_v2_multigrupo.sql) — varios grupos, asignar productos a usuarios.
+> 2. [`supabase/migration_v3_avatars.sql`](supabase/migration_v3_avatars.sql) — avatares de perfil.
+> 3. [`supabase/migration_v4_tareas.sql`](supabase/migration_v4_tareas.sql) — sección Tareas.
+>
+> Ninguna borra nada de lo que ya tenías.
 
 ---
 
@@ -123,8 +125,41 @@ hacerlo desde el menú ⋮ → "Añadir a pantalla de inicio".
 En la lista de la compra, toca el **nombre de cualquier producto** (no los
 botones de +/−/✕) para abrir el selector de "Asignar a" con los miembros del
 grupo actual, o "Sin asignar" para quitar la asignación. Se ve reflejado
-debajo del nombre del producto (`👤 Nombre` o `Sin asignar`) y se sincroniza
-en tiempo real para todos.
+debajo del nombre del producto (avatar + nombre, o "Sin asignar") y se
+sincroniza en tiempo real para todos.
+
+## 6d. Tareas
+
+Tercera pestaña del menú, entre Alimentos y Cuenta.
+
+- **Vista Lista**: tareas ordenadas por fecha, agrupadas por día ("Hoy",
+  "Mañana"...). Muestra hasta un mes hacia atrás para ver qué se cumplió.
+- **Vista Calendario**: mes completo en cuadrícula. Flechas ‹ › para cambiar
+  de mes; tocar el nombre del mes/año abre un selector directo. Los días con
+  tareas pendientes muestran un número en una insignia; los días de una
+  actividad se resaltan enteros.
+- **+ Nueva tarea**: elige primero el **tipo** (no se puede cambiar después
+  de creada) y el formulario muestra solo los campos que aplican:
+  - **Básica**: fecha, hora opcional, marcar como hecha.
+  - **Lista**: una tarea con sub-elementos con su propio check (como una
+    mini lista de la compra) — se gestiona en su propia hoja al tocarla.
+  - **Recurrente**: elige los días de la semana y hasta cuándo se repite;
+    se crea una fila independiente por cada fecha para poder marcarlas
+    completas una a una. *(Ahora mismo usa la misma hora para todos los
+    días elegidos — si quieres horas distintas por día, dímelo y lo amplío.)*
+  - **Gestión**: pensada para trámites importantes, con recordatorio
+    configurable (antelación + repetición).
+  - **Actividad**: rango de fechas (ej. unas vacaciones), se resalta el
+    bloque completo de días en el calendario.
+  - Todas se pueden **asignar a un miembro** del grupo, igual que en Compra.
+
+> ⚠️ **Sobre los recordatorios de "Gestión":** son avisos **dentro de la
+> app** (un aviso emergente) que solo se disparan si la tienes abierta en
+> ese momento — no son notificaciones push reales del sistema operativo.
+> Implementar push de verdad (que llegue incluso con la app cerrada) requiere
+> un servidor adicional que dispare los avisos y, en iPhone, tiene bastantes
+> limitaciones propias de Apple. Si te interesa más adelante, es una
+> ampliación aparte que podemos abordar.
 
 ---
 
@@ -136,21 +171,25 @@ css/styles.css          Sistema de diseño completo
 js/
   config.js              Credenciales de Supabase (rellenar)
   supabaseClient.js       Cliente único de Supabase
+  avatars.js                Catálogo de avatares
   state.js                 Estado en memoria + paleta de categorías
   toast.js                  Notificaciones no intrusivas
   auth.js                    Login / registro / logout
   groupSetup.js               Crear/unirse/cambiar/salir/eliminar grupo
   foods.js                     Catálogo de alimentos (CRUD)
   shopping.js                   Lista de la compra + asignación a usuarios
-  realtime.js                    Suscripción a cambios en vivo
-  settings.js                     Pantalla Cuenta (perfil + mis grupos + miembros)
-  app.js                           Router y arranque
+  tasks.js                       Sección Tareas (lista, calendario, tipos, recordatorios)
+  realtime.js                     Suscripción a cambios en vivo
+  settings.js                      Pantalla Cuenta (perfil + mis grupos + miembros)
+  app.js                            Router y arranque
 manifest.json            Manifest de la PWA
 sw.js                     Service Worker (cachea el shell, no los datos)
-icons/                     Iconos generados (gen_icons.py)
+icons/                     Iconos e ilustraciones (avatares en icons/avatars/, gestionados a mano)
 supabase/
   schema.sql               Esquema completo (proyecto nuevo)
-  migration_v2_multigrupo.sql  Migración incremental (proyecto ya existente)
+  migration_v2_multigrupo.sql  Migración incremental — multi-grupo y asignación
+  migration_v3_avatars.sql      Migración incremental — avatares
+  migration_v4_tareas.sql        Migración incremental — sección Tareas
 vercel.json                 Cabeceras para despliegue en Vercel
 ```
 

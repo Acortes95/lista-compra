@@ -222,14 +222,18 @@ function renderItemRow(item, pal) {
   const unit = item.foods?.unit || '';
   const assignedName = AppState.memberName(item.assigned_to);
   const assignedLabel = assignedName
-    ? `<img class="assign-avatar" src="${avatarUrl(AppState.memberAvatar(item.assigned_to))}" alt="">${escapeHtml(assignedName)}`
-    : 'Sin asignar';
+    ? `<span class="assign-chip"><img class="assign-avatar" src="${avatarUrl(AppState.memberAvatar(item.assigned_to))}" alt="">${escapeHtml(assignedName)}</span>`
+    : `<span>Sin asignar</span>`;
   return `
     <div class="item-row ${item.purchased ? 'purchased' : ''}" style="--cat-color:${pal.color}">
       <button class="item-check ${item.purchased ? 'checked' : ''}" data-toggle="${item.id}">✓</button>
       <div class="item-body" data-assign="${item.id}">
         <div class="item-name">${escapeHtml(name)}</div>
-        <div class="item-meta">${formatQty(item.quantity)} ${escapeHtml(unit)} · ${assignedLabel}</div>
+        <div class="item-meta">
+          <span>${formatQty(item.quantity)} ${escapeHtml(unit)}</span>
+          <span class="meta-sep">·</span>
+          ${assignedLabel}
+        </div>
       </div>
       ${!item.purchased ? `
       <div class="qty-stepper">
