@@ -83,6 +83,7 @@ function tasksOnDate(dateStr) {
 let taskFormDraftItems = [];
 let dayTasksSheetDate = null;
 let checklistTaskId = null;
+let pendingDeleteTask = null;
 
 function initTasksScreen() {
   // Alternar vista lista / calendario
@@ -154,8 +155,33 @@ function initTasksScreen() {
     const id = document.getElementById('task-id').value;
     const task = AppState.taskById(id);
     if (!task) return;
+
+    if (task.type === 'recurrente' && task.recurrence_group_id) {
+      openDeleteRecurringSheet(task);
+      return;
+    }
     if (!confirm('¿Eliminar esta tarea?')) return;
     await deleteTask(task);
+    closeTaskSheet();
+  });
+
+  // Sheet: eliminar tarea recurrente (una fecha o todas)
+  document.getElementById('sheet-delete-recurring').addEventListener('click', (e) => {
+    if (e.target.id === 'sheet-delete-recurring') closeDeleteRecurringSheet();
+  });
+  document.getElementById('btn-cancel-delete-recurring').addEventListener('click', closeDeleteRecurringSheet);
+  document.getElementById('btn-delete-recurring-one').addEventListener('click', async () => {
+    if (!pendingDeleteTask) return;
+    const task = pendingDeleteTask;
+    closeDeleteRecurringSheet();
+    await deleteTask(task);
+    closeTaskSheet();
+  });
+  document.getElementById('btn-delete-recurring-all').addEventListener('click', async () => {
+    if (!pendingDeleteTask) return;
+    const recurrenceGroupId = pendingDeleteTask.recurrence_group_id;
+    closeDeleteRecurringSheet();
+    await deleteAllRecurrence(recurrenceGroupId);
     closeTaskSheet();
   });
 
@@ -190,8 +216,10 @@ function renderTasksScreen() {
   document.getElementById('tasks-list-view').classList.toggle('hidden', AppState.uiState.tasksView !== 'list');
   document.getElementById('tasks-calendar-view').classList.toggle('hidden', AppState.uiState.tasksView !== 'calendar');
 
-  if (AppState.uiState.tasksView === 'list') renderTasksListView();
-  else renderTasksCalendarView();
+  // Se renderizan SIEMPRE las dos vistas (aunque una esté oculta), para que
+  // al cambiar de pestaña nunca se vea contenido desactualizado.
+  renderTasksListView();
+  renderTasksCalendarView();
 }
 
 function renderTaskRow(task) {
@@ -594,6 +622,27 @@ async function deleteTask(task) {
     .eq('id', task.id);
   if (error) { showToast('No se pudo eliminar la tarea.'); return; }
   showToast('Tarea eliminada');
+  await loadTasks();
+  renderTasksScreen();
+}
+
+function openDeleteRecurringSheet(task) {
+  pendingDeleteTask = task;
+  document.getElementById('sheet-delete-recurring').classList.remove('hidden');
+}
+function closeDeleteRecurringSheet() {
+  document.getElementById('sheet-delete-recurring').classList.add('hidden');
+  pendingDeleteTask = null;
+}
+
+async function deleteAllRecurrence(recurrenceGroupId) {
+  const { error } = await supabaseClient
+    .from('tasks')
+    .update({ deleted_at: new Date().toISOString() })
+    .eq('group_id', AppState.group.id)
+    .eq('recurrence_group_id', recurrenceGroupId);
+  if (error) { showToast('No se pudieron eliminar las repeticiones.'); return; }
+  showToast('Repeticiones eliminadas');
   await loadTasks();
   renderTasksScreen();
 }
