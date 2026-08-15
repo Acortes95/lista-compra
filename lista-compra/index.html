@@ -22,7 +22,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@600;700;800&display=swap" rel="stylesheet">
 
-<link rel="stylesheet" href="css/styles.css?v=10">
+<link rel="stylesheet" href="css/styles.css?v=11">
 </head>
 <body>
 
@@ -463,6 +463,18 @@
   </div>
 </div>
 
+<!-- ============ SHEET: Eliminar tarea recurrente ============ -->
+<div id="sheet-delete-recurring" class="sheet-backdrop hidden">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <h2>Eliminar tarea recurrente</h2>
+    <p class="field-hint">Esta tarea se repite en varios días. ¿Qué quieres eliminar?</p>
+    <button type="button" class="btn btn-secondary" id="btn-delete-recurring-one" style="width:100%; margin-bottom:8px;">Solo esta fecha</button>
+    <button type="button" class="btn btn-danger" id="btn-delete-recurring-all" style="width:100%; margin-bottom:8px;">Eliminar todas las repeticiones</button>
+    <button type="button" class="btn btn-secondary" id="btn-cancel-delete-recurring" style="width:100%;">Cancelar</button>
+  </div>
+</div>
+
 <!-- ============ SHEET: Tareas de un día ============ -->
 <div id="sheet-day-tasks" class="sheet-backdrop hidden">
   <div class="sheet">
@@ -521,18 +533,18 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="js/config.js?v=10"></script>
-<script src="js/supabaseClient.js?v=10"></script>
-<script src="js/avatars.js?v=10"></script>
-<script src="js/state.js?v=10"></script>
-<script src="js/toast.js?v=10"></script>
-<script src="js/auth.js?v=10"></script>
-<script src="js/groupSetup.js?v=10"></script>
-<script src="js/foods.js?v=10"></script>
-<script src="js/shopping.js?v=10"></script>
-<script src="js/tasks.js?v=10"></script>
-<script src="js/realtime.js?v=10"></script>
-<script src="js/settings.js?v=10"></script>
-<script src="js/app.js?v=10"></script>
+<script src="js/config.js?v=11"></script>
+<script src="js/supabaseClient.js?v=11"></script>
+<script src="js/avatars.js?v=11"></script>
+<script src="js/state.js?v=11"></script>
+<script src="js/toast.js?v=11"></script>
+<script src="js/auth.js?v=11"></script>
+<script src="js/groupSetup.js?v=11"></script>
+<script src="js/foods.js?v=11"></script>
+<script src="js/shopping.js?v=11"></script>
+<script src="js/tasks.js?v=11"></script>
+<script src="js/realtime.js?v=11"></script>
+<script src="js/settings.js?v=11"></script>
+<script src="js/app.js?v=11"></script>
 </body>
 </html>
