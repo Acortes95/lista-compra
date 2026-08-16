@@ -217,9 +217,11 @@ function renderTasksScreen() {
   document.getElementById('tasks-calendar-view').classList.toggle('hidden', AppState.uiState.tasksView !== 'calendar');
 
   // Se renderizan SIEMPRE las dos vistas (aunque una esté oculta), para que
-  // al cambiar de pestaña nunca se vea contenido desactualizado.
+  // al cambiar de pestaña nunca se vea contenido desactualizado. También se
+  // refresca el popup de "tareas de un día" si lo tienes abierto.
   renderTasksListView();
   renderTasksCalendarView();
+  refreshDayTasksSheetIfOpen();
 }
 
 function renderTaskRow(task) {
@@ -366,23 +368,37 @@ function closeMonthPickerSheet() {
   document.getElementById('sheet-month-picker').classList.add('hidden');
 }
 
-function openDayTasksSheet(dateStr) {
-  dayTasksSheetDate = dateStr;
-  const d = parseDateStr(dateStr);
-  document.getElementById('day-tasks-title').textContent =
-    `${formatDateHuman(dateStr)} · ${d.getDate()} ${MONTH_NAMES[d.getMonth()]}`;
-
+function renderDayTasksList(dateStr) {
   const list = document.getElementById('day-tasks-list');
   const dayTasks = tasksOnDate(dateStr);
   list.innerHTML = dayTasks.length
     ? dayTasks.map(t => renderTaskRow(t)).join('')
     : `<p class="field-hint">No hay tareas este día.</p>`;
   attachTaskRowListeners(list);
+}
 
+function openDayTasksSheet(dateStr) {
+  dayTasksSheetDate = dateStr;
+  const d = parseDateStr(dateStr);
+  document.getElementById('day-tasks-title').textContent =
+    `${formatDateHuman(dateStr)} · ${d.getDate()} ${MONTH_NAMES[d.getMonth()]}`;
+
+  renderDayTasksList(dateStr);
   document.getElementById('sheet-day-tasks').classList.remove('hidden');
 }
 function closeDayTasksSheet() {
   document.getElementById('sheet-day-tasks').classList.add('hidden');
+  dayTasksSheetDate = null;
+}
+
+// Si el popup de "tareas de un día" está abierto, lo refresca también.
+// Se llama desde renderTasksScreen() para que cualquier cambio (marcar
+// completada, borrar...) se vea reflejado ahí sin tener que cerrar y
+// volver a abrir el popup.
+function refreshDayTasksSheetIfOpen() {
+  const sheet = document.getElementById('sheet-day-tasks');
+  if (!dayTasksSheetDate || sheet.classList.contains('hidden')) return;
+  renderDayTasksList(dayTasksSheetDate);
 }
 
 // ---------------- Sheet: crear / editar tarea ----------------
