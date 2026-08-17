@@ -12,6 +12,17 @@ function initSettingsScreen() {
   document.getElementById('btn-leave-group').addEventListener('click', onLeaveGroupClick);
   document.getElementById('btn-delete-group').addEventListener('click', onDeleteGroupClick);
 
+  // Eliminar cuenta
+  document.getElementById('btn-delete-account').addEventListener('click', openDeleteAccountSheet);
+  document.getElementById('sheet-delete-account').addEventListener('click', (e) => {
+    if (e.target.id === 'sheet-delete-account') closeDeleteAccountSheet();
+  });
+  document.getElementById('btn-cancel-delete-account').addEventListener('click', closeDeleteAccountSheet);
+  document.getElementById('delete-account-confirm-input').addEventListener('input', (e) => {
+    document.getElementById('btn-confirm-delete-account').disabled = e.target.value.trim().toUpperCase() !== 'ELIMINAR';
+  });
+  document.getElementById('btn-confirm-delete-account').addEventListener('click', onConfirmDeleteAccount);
+
   document.querySelectorAll('[data-group-tab]').forEach(tab => {
     tab.addEventListener('click', () => {
       document.querySelectorAll('[data-group-tab]').forEach(t => t.classList.remove('active'));
@@ -233,4 +244,49 @@ async function onDeleteGroupClick() {
   if (!AppState.group) return;
   if (!confirm(`¿Eliminar el grupo "${AppState.group.name}"?\n\nSe borrarán todos sus productos, alimentos y categorías para todos los miembros. Esta acción no se puede deshacer.`)) return;
   await deleteGroupFlow(AppState.group.id);
+}
+
+// ---------------- Eliminar cuenta ----------------
+
+function openDeleteAccountSheet() {
+  document.getElementById('delete-account-confirm-input').value = '';
+  document.getElementById('btn-confirm-delete-account').disabled = true;
+  hideDeleteAccountError();
+  document.getElementById('sheet-delete-account').classList.remove('hidden');
+  setTimeout(() => document.getElementById('delete-account-confirm-input').focus(), 50);
+}
+
+function closeDeleteAccountSheet() {
+  document.getElementById('sheet-delete-account').classList.add('hidden');
+}
+
+function showDeleteAccountError(msg) {
+  const el = document.getElementById('delete-account-error');
+  el.textContent = msg;
+  el.classList.remove('hidden');
+}
+function hideDeleteAccountError() {
+  document.getElementById('delete-account-error').classList.add('hidden');
+}
+
+async function onConfirmDeleteAccount() {
+  hideDeleteAccountError();
+  const btn = document.getElementById('btn-confirm-delete-account');
+  btn.disabled = true;
+  btn.textContent = 'Eliminando…';
+
+  const { error } = await supabaseClient.rpc('delete_own_account');
+
+  if (error) {
+    btn.textContent = 'Eliminar mi cuenta definitivamente';
+    btn.disabled = false;
+    showDeleteAccountError('No se pudo eliminar la cuenta. Inténtalo de nuevo.');
+    return;
+  }
+
+  // La cuenta y todos sus datos ya no existen en el servidor.
+  // Cerramos la sesión local para volver a la pantalla de entrada.
+  closeDeleteAccountSheet();
+  await supabaseClient.auth.signOut();
+  showToast('Tu cuenta se ha eliminado.');
 }
