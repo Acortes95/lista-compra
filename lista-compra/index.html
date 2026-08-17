@@ -22,7 +22,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@600;700;800&display=swap" rel="stylesheet">
 
-<link rel="stylesheet" href="css/styles.css?v=12">
+<link rel="stylesheet" href="css/styles.css?v=13">
 </head>
 <body>
 
@@ -191,6 +191,12 @@
         </div>
 
         <button id="btn-logout" class="btn btn-danger" style="width:100%; margin-top:6px;">Cerrar sesión</button>
+
+        <div class="setup-card" style="margin-top:22px; border:1.5px solid var(--coral-bg);">
+          <h3 style="color:var(--coral);">Zona de peligro</h3>
+          <p>Elimina tu cuenta y todos tus datos personales de forma permanente. Si eres el único miembro de algún grupo, ese grupo también se eliminará junto con su contenido.</p>
+          <button id="btn-delete-account" class="btn btn-danger" style="width:100%; margin-top:6px;">Eliminar mi cuenta</button>
+        </div>
       </div>
     </section>
 
@@ -463,6 +469,28 @@
   </div>
 </div>
 
+<!-- ============ SHEET: Eliminar cuenta ============ -->
+<div id="sheet-delete-account" class="sheet-backdrop hidden">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <h2 style="color:var(--coral);">Eliminar tu cuenta</h2>
+    <p class="field-hint">
+      Esta acción es <strong>permanente e irreversible</strong>. Se eliminará tu perfil,
+      tu email de acceso y tu avatar. Si eres el único miembro de algún grupo, ese grupo
+      y todo su contenido (alimentos, listas de la compra y tareas) se eliminarán también.
+      Si compartes grupo con alguien más, ese grupo y su contenido se conservan para
+      los demás miembros — solo se elimina tu vínculo con ellos.
+    </p>
+    <div class="field">
+      <label for="delete-account-confirm-input">Escribe ELIMINAR para confirmar</label>
+      <input id="delete-account-confirm-input" type="text" autocomplete="off" autocapitalize="characters" placeholder="ELIMINAR">
+    </div>
+    <div id="delete-account-error" class="error-msg hidden"></div>
+    <button type="button" class="btn btn-secondary" id="btn-cancel-delete-account" style="width:100%; margin-bottom:8px;">Cancelar</button>
+    <button type="button" class="btn btn-danger" id="btn-confirm-delete-account" style="width:100%;" disabled>Eliminar mi cuenta definitivamente</button>
+  </div>
+</div>
+
 <!-- ============ SHEET: Eliminar tarea recurrente ============ -->
 <div id="sheet-delete-recurring" class="sheet-backdrop hidden">
   <div class="sheet">
@@ -533,18 +561,18 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="js/config.js?v=12"></script>
-<script src="js/supabaseClient.js?v=12"></script>
-<script src="js/avatars.js?v=12"></script>
-<script src="js/state.js?v=12"></script>
-<script src="js/toast.js?v=12"></script>
-<script src="js/auth.js?v=12"></script>
-<script src="js/groupSetup.js?v=12"></script>
-<script src="js/foods.js?v=12"></script>
-<script src="js/shopping.js?v=12"></script>
-<script src="js/tasks.js?v=12"></script>
-<script src="js/realtime.js?v=12"></script>
-<script src="js/settings.js?v=12"></script>
-<script src="js/app.js?v=12"></script>
+<script src="js/config.js?v=13"></script>
+<script src="js/supabaseClient.js?v=13"></script>
+<script src="js/avatars.js?v=13"></script>
+<script src="js/state.js?v=13"></script>
+<script src="js/toast.js?v=13"></script>
+<script src="js/auth.js?v=13"></script>
+<script src="js/groupSetup.js?v=13"></script>
+<script src="js/foods.js?v=13"></script>
+<script src="js/shopping.js?v=13"></script>
+<script src="js/tasks.js?v=13"></script>
+<script src="js/realtime.js?v=13"></script>
+<script src="js/settings.js?v=13"></script>
+<script src="js/app.js?v=13"></script>
 </body>
 </html>
