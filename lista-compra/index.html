@@ -22,7 +22,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@600;700;800&display=swap" rel="stylesheet">
 
-<link rel="stylesheet" href="css/styles.css?v=13">
+<link rel="stylesheet" href="css/styles.css?v=15">
 </head>
 <body>
 
@@ -54,6 +54,7 @@
           <input id="login-password" type="password" autocomplete="current-password" required>
         </div>
         <button type="submit" class="btn btn-primary" style="width:100%">Entrar</button>
+        <button type="button" class="link-btn" id="btn-open-forgot-password" style="display:block; text-align:center; width:100%; margin-top:12px; color:var(--ink-soft);">¿Olvidaste tu contraseña?</button>
       </form>
 
       <form id="form-signup" class="hidden">
@@ -69,7 +70,43 @@
           <label for="signup-password">Contraseña</label>
           <input id="signup-password" type="password" autocomplete="new-password" minlength="6" required>
         </div>
+        <div class="field">
+          <label for="signup-password-confirm">Repite la contraseña</label>
+          <input id="signup-password-confirm" type="password" autocomplete="new-password" minlength="6" required>
+        </div>
         <button type="submit" class="btn btn-primary" style="width:100%">Crear cuenta</button>
+      </form>
+
+      <div id="auth-check-email" class="hidden">
+        <div class="empty-state" style="padding-top:10px;">
+          <span class="emoji">📬</span>
+          <p>Revisa tu correo</p>
+          <p class="hint">Te hemos enviado un enlace a <strong id="check-email-address"></strong>. Ábrelo para activar tu cuenta.</p>
+        </div>
+        <div id="resend-msg" class="hidden" style="text-align:center; font-size:12.5px; color:var(--ink-soft); margin-bottom:10px;">Email reenviado</div>
+        <button type="button" class="btn btn-secondary" id="btn-resend-confirmation" style="width:100%; margin-top:4px;">Reenviar email</button>
+        <button type="button" class="btn btn-secondary" id="btn-back-to-login" style="width:100%; margin-top:8px;">Volver</button>
+      </div>
+    </section>
+
+    <!-- ============ RESET PASSWORD (tras el enlace del email) ============ -->
+    <section id="screen-reset-password" class="auth-screen screen hidden">
+      <div class="auth-brand">
+        <div class="mark">🔑</div>
+        <h1>Nueva contraseña</h1>
+        <p>Elige una contraseña nueva para tu cuenta.</p>
+      </div>
+      <div id="reset-password-error" class="error-msg hidden"></div>
+      <form id="form-reset-password">
+        <div class="field">
+          <label for="reset-password-new">Nueva contraseña</label>
+          <input id="reset-password-new" type="password" autocomplete="new-password" minlength="6" required>
+        </div>
+        <div class="field">
+          <label for="reset-password-confirm">Repite la contraseña</label>
+          <input id="reset-password-confirm" type="password" autocomplete="new-password" minlength="6" required>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width:100%">Guardar contraseña</button>
       </form>
     </section>
 
@@ -328,6 +365,33 @@
   </div>
 </div>
 
+<!-- ============ SHEET: Forgot password ============ -->
+<div id="sheet-forgot-password" class="sheet-backdrop hidden">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <h2>Recuperar contraseña</h2>
+
+    <div id="forgot-password-form-wrap">
+      <p class="field-hint">Te enviaremos un enlace a tu email para elegir una contraseña nueva.</p>
+      <div id="forgot-password-error" class="error-msg hidden"></div>
+      <div class="field">
+        <label for="forgot-password-email">Email</label>
+        <input id="forgot-password-email" type="email" autocomplete="email" required>
+      </div>
+      <button type="button" class="btn btn-primary" id="btn-send-reset-link" style="width:100%;">Enviar enlace</button>
+    </div>
+
+    <div id="forgot-password-sent" class="hidden">
+      <div class="empty-state" style="padding-top:6px;">
+        <span class="emoji">📬</span>
+        <p>Revisa tu correo</p>
+        <p class="hint">Si existe una cuenta con ese email, te hemos enviado un enlace para elegir una contraseña nueva.</p>
+      </div>
+      <button type="button" class="btn btn-secondary" id="btn-close-forgot-password" style="width:100%;">Cerrar</button>
+    </div>
+  </div>
+</div>
+
 <!-- ============ SHEET: Assign product ============ -->
 <div id="sheet-assign" class="sheet-backdrop hidden">
   <div class="sheet">
@@ -561,18 +625,18 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="js/config.js?v=13"></script>
-<script src="js/supabaseClient.js?v=13"></script>
-<script src="js/avatars.js?v=13"></script>
-<script src="js/state.js?v=13"></script>
-<script src="js/toast.js?v=13"></script>
-<script src="js/auth.js?v=13"></script>
-<script src="js/groupSetup.js?v=13"></script>
-<script src="js/foods.js?v=13"></script>
-<script src="js/shopping.js?v=13"></script>
-<script src="js/tasks.js?v=13"></script>
-<script src="js/realtime.js?v=13"></script>
-<script src="js/settings.js?v=13"></script>
-<script src="js/app.js?v=13"></script>
+<script src="js/config.js?v=15"></script>
+<script src="js/supabaseClient.js?v=15"></script>
+<script src="js/avatars.js?v=15"></script>
+<script src="js/state.js?v=15"></script>
+<script src="js/toast.js?v=15"></script>
+<script src="js/auth.js?v=15"></script>
+<script src="js/groupSetup.js?v=15"></script>
+<script src="js/foods.js?v=15"></script>
+<script src="js/shopping.js?v=15"></script>
+<script src="js/tasks.js?v=15"></script>
+<script src="js/realtime.js?v=15"></script>
+<script src="js/settings.js?v=15"></script>
+<script src="js/app.js?v=15"></script>
 </body>
 </html>
