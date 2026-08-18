@@ -2,7 +2,8 @@
 // App — arranque, navegación entre pantallas, auth state
 // ============================================================
 
-const SCREENS = ['auth', 'group-setup', 'shopping', 'foods', 'tasks', 'settings', 'loading'];
+const SCREENS = ['auth', 'reset-password', 'group-setup', 'shopping', 'foods', 'tasks', 'settings', 'loading'];
+let passwordRecoveryMode = false;
 
 function showScreen(name) {
   SCREENS.forEach(s => {
@@ -107,13 +108,24 @@ document.addEventListener('DOMContentLoaded', () => {
   initBottomNav();
 
   supabaseClient.auth.onAuthStateChange((event, session) => {
+    if (event === 'PASSWORD_RECOVERY') {
+      // El usuario ha vuelto desde el enlace de "recuperar contraseña" del
+      // email. Hay una sesión temporal válida, pero antes de dejarle entrar
+      // a la app le pedimos que elija una contraseña nueva.
+      passwordRecoveryMode = true;
+      AppState.session = session;
+      showScreen('reset-password');
+      return;
+    }
     if (event === 'SIGNED_OUT') {
+      passwordRecoveryMode = false;
       resetAppState();
       showScreen('auth');
       return;
     }
     if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION' || event === 'TOKEN_REFRESHED') {
       AppState.session = session;
+      if (passwordRecoveryMode) return; // Esperamos a que complete el formulario de nueva contraseña.
       if (event !== 'TOKEN_REFRESHED') bootApp();
     }
   });
