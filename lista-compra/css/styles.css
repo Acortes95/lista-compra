@@ -710,6 +710,24 @@ a { color: inherit; }
 
 .field textarea { resize: vertical; min-height: 60px; }
 
+.password-field-wrap { position: relative; }
+.password-field-wrap input { padding-right: 44px; }
+.password-toggle {
+  position: absolute;
+  right: 3px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink-soft);
+  font-size: 15px;
+  border-radius: 50%;
+}
+.password-toggle:active { background: var(--line); }
+
 .sheet-actions {
   display: flex;
   gap: 10px;
