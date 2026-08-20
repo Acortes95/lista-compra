@@ -165,7 +165,17 @@ function initAuthScreen() {
     btn.textContent = 'Guardar contraseña';
 
     if (error) {
-      return showResetPasswordError('No se pudo guardar la contraseña. Inténtalo de nuevo.');
+      const msg = (error.message || '').toLowerCase();
+      if (msg.includes('session') || msg.includes('token') || msg.includes('expired') || msg.includes('invalid')) {
+        return showResetPasswordError('Este enlace ya no es válido (puede haber caducado o haberse usado ya). Vuelve a pedir uno nuevo desde "¿Olvidaste tu contraseña?".');
+      }
+      if (msg.includes('should be at least') || msg.includes('password should')) {
+        return showResetPasswordError('La contraseña debe tener al menos 6 caracteres.');
+      }
+      if (msg.includes('different from the old password')) {
+        return showResetPasswordError('La nueva contraseña debe ser distinta de la actual.');
+      }
+      return showResetPasswordError(`No se pudo guardar la contraseña: ${error.message || 'error desconocido'}`);
     }
 
     passwordRecoveryMode = false;
