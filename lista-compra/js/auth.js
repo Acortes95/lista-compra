@@ -160,22 +160,24 @@ function initAuthScreen() {
     const btn = form.querySelector('button[type="submit"]');
     btn.textContent = 'Guardando…';
 
+    const { data: sessionCheck } = await supabaseClient.auth.getSession();
+    console.log('[reset-password] ¿hay sesión activa justo antes de guardar?', !!sessionCheck.session, sessionCheck.session?.user?.email);
+
     const { error } = await supabaseClient.auth.updateUser({ password: newPassword });
 
     btn.textContent = 'Guardar contraseña';
 
     if (error) {
+      console.error('[reset-password] error real de Supabase:', error);
       const msg = (error.message || '').toLowerCase();
-      if (msg.includes('session') || msg.includes('token') || msg.includes('expired') || msg.includes('invalid')) {
-        return showResetPasswordError('Este enlace ya no es válido (puede haber caducado o haberse usado ya). Vuelve a pedir uno nuevo desde "¿Olvidaste tu contraseña?".');
-      }
       if (msg.includes('should be at least') || msg.includes('password should')) {
         return showResetPasswordError('La contraseña debe tener al menos 6 caracteres.');
       }
       if (msg.includes('different from the old password')) {
         return showResetPasswordError('La nueva contraseña debe ser distinta de la actual.');
       }
-      return showResetPasswordError(`No se pudo guardar la contraseña: ${error.message || 'error desconocido'}`);
+      // Mostramos el mensaje técnico real (temporalmente) para poder diagnosticar.
+      return showResetPasswordError(`No se pudo guardar la contraseña — motivo real: "${error.message}" (código: ${error.status || error.code || 'n/d'})`);
     }
 
     passwordRecoveryMode = false;
