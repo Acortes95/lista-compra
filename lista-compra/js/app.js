@@ -132,6 +132,19 @@ function resetAppState() {
   updateNavAvatar();
 }
 
+function initPasswordToggles() {
+  document.querySelectorAll('.password-toggle').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const input = document.getElementById(btn.dataset.target);
+      if (!input) return;
+      const showing = input.type === 'password';
+      input.type = showing ? 'text' : 'password';
+      btn.textContent = showing ? '🙈' : '👁';
+      btn.setAttribute('aria-label', showing ? 'Ocultar contraseña' : 'Mostrar contraseña');
+    });
+  });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   initAuthScreen();
   initGroupSetupScreen();
@@ -140,6 +153,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initTasksScreen();
   initSettingsScreen();
   initBottomNav();
+  initPasswordToggles();
 
   if (urlIndicatesPasswordRecovery()) {
     passwordRecoveryMode = true;
