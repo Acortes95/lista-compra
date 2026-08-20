@@ -5,6 +5,36 @@
 const SCREENS = ['auth', 'reset-password', 'group-setup', 'shopping', 'foods', 'tasks', 'settings', 'loading'];
 let passwordRecoveryMode = false;
 
+// Comprueba la URL directamente (en vez de fiarnos solo del evento
+// PASSWORD_RECOVERY, que a veces llega antes de que empecemos a escuchar,
+// o se "camufla" como un simple inicio de sesión normal). Supabase incluye
+// "type=recovery" tanto en el fragmento #hash como en la query string,
+// según el formato de enlace que use el proyecto.
+function urlIndicatesPasswordRecovery() {
+  const hash = window.location.hash || '';
+  const search = window.location.search || '';
+  return hash.includes('type=recovery') || search.includes('type=recovery');
+}
+
+// Si Supabase redirige con un error en la URL (enlace caducado, ya usado,
+// etc.), lo capturamos aquí para mostrarlo en la pantalla de login, y
+// limpiamos la URL para que no se quede pegado ni se reprocese al recargar.
+let pendingAuthHashError = null;
+function checkAuthHashError() {
+  const hash = window.location.hash || '';
+  if (!hash.includes('error=')) return;
+
+  const params = new URLSearchParams(hash.substring(1));
+  const code = params.get('error_code');
+  const description = params.get('error_description');
+
+  pendingAuthHashError = (code === 'otp_expired')
+    ? 'El enlace ha caducado o ya se ha usado. Pide uno nuevo.'
+    : (description ? decodeURIComponent(description.replace(/\+/g, ' ')) : 'El enlace no es válido. Pide uno nuevo.');
+
+  history.replaceState(null, '', window.location.pathname + window.location.search);
+}
+
 function showScreen(name) {
   SCREENS.forEach(s => {
     document.getElementById(`screen-${s}`).classList.toggle('hidden', s !== name);
@@ -65,6 +95,10 @@ async function bootApp() {
 
   if (!session) {
     showScreen('auth');
+    if (pendingAuthHashError) {
+      showAuthError(pendingAuthHashError);
+      pendingAuthHashError = null;
+    }
     return;
   }
 
@@ -106,6 +140,13 @@ document.addEventListener('DOMContentLoaded', () => {
   initTasksScreen();
   initSettingsScreen();
   initBottomNav();
+
+  if (urlIndicatesPasswordRecovery()) {
+    passwordRecoveryMode = true;
+    showScreen('reset-password');
+  } else {
+    checkAuthHashError();
+  }
 
   supabaseClient.auth.onAuthStateChange((event, session) => {
     if (event === 'PASSWORD_RECOVERY') {
