@@ -5,15 +5,40 @@
 const SCREENS = ['auth', 'reset-password', 'group-setup', 'shopping', 'foods', 'tasks', 'settings', 'loading'];
 let passwordRecoveryMode = false;
 
-// Comprueba la URL directamente (en vez de fiarnos solo del evento
-// PASSWORD_RECOVERY, que a veces llega antes de que empecemos a escuchar,
-// o se "camufla" como un simple inicio de sesión normal). Supabase incluye
-// "type=recovery" tanto en el fragmento #hash como en la query string,
-// según el formato de enlace que use el proyecto.
+// Comprueba la URL directamente. Supabase incluye "type=recovery" tanto en
+// el fragmento #hash como en la query string, según el formato de enlace
+// que use el proyecto.
 function urlIndicatesPasswordRecovery() {
   const hash = window.location.hash || '';
   const search = window.location.search || '';
   return hash.includes('type=recovery') || search.includes('type=recovery');
+}
+
+// Muestra la pantalla de "nueva contraseña" y ESPERA de verdad a que
+// Supabase termine de procesar el enlace (es asíncrono) antes de dejar
+// tocar el formulario — si no, un envío demasiado rápido falla con
+// "Auth session missing" porque la sesión todavía no estaba lista.
+async function initResetPasswordScreenIfNeeded() {
+  if (!urlIndicatesPasswordRecovery()) {
+    checkAuthHashError();
+    return;
+  }
+
+  passwordRecoveryMode = true;
+  showScreen('reset-password');
+  document.getElementById('reset-password-verifying').classList.remove('hidden');
+  document.getElementById('form-reset-password').classList.add('hidden');
+
+  const { data } = await supabaseClient.auth.getSession();
+
+  document.getElementById('reset-password-verifying').classList.add('hidden');
+
+  if (data.session) {
+    AppState.session = data.session;
+    document.getElementById('form-reset-password').classList.remove('hidden');
+  } else {
+    showResetPasswordError('Este enlace ya no es válido o ha caducado. Vuelve a pedir uno nuevo desde "¿Olvidaste tu contraseña?".');
+  }
 }
 
 // Si Supabase redirige con un error en la URL (enlace caducado, ya usado,
@@ -155,12 +180,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initBottomNav();
   initPasswordToggles();
 
-  if (urlIndicatesPasswordRecovery()) {
-    passwordRecoveryMode = true;
-    showScreen('reset-password');
-  } else {
-    checkAuthHashError();
-  }
+  initResetPasswordScreenIfNeeded();
 
   supabaseClient.auth.onAuthStateChange((event, session) => {
     if (event === 'PASSWORD_RECOVERY') {
